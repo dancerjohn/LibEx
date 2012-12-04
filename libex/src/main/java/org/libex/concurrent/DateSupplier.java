@@ -23,6 +23,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 /**
+ * Provides the current system {@code Date} in a test-overridable manner.
+ * 
  * @author John Butler
  * 
  */
@@ -35,10 +37,16 @@ public class DateSupplier {
 
 	private static DateSupplier instance;
 
+	/**
+	 * @return the current {@link Date} produced via {@code new Date()}
+	 */
 	public static Date getCurrentDate() {
 		return getInstance().getOverridableDate();
 	}
 
+	/**
+	 * @return the current time produced via {@code new Date().getTime()}
+	 */
 	public static long getCurrentDateInMilliseconds() {
 		return getCurrentDate().getTime();
 	}
@@ -65,6 +73,12 @@ public class DateSupplier {
 		}
 	}
 
+	/**
+	 * Allows for setting the singleton instance in a test environment.
+	 * 
+	 * @param instance
+	 *            the replacement instance
+	 */
 	protected static void setInstance(DateSupplier instance) {
 
 		writeLock.lock();
@@ -78,6 +92,12 @@ public class DateSupplier {
 	protected DateSupplier() {
 	}
 
+	/**
+	 * Method that should be overridden in a test environment to control the
+	 * date.
+	 * 
+	 * @return the current {@link Date}
+	 */
 	protected Date getOverridableDate() {
 		return new Date();
 	}

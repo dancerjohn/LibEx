@@ -1,10 +1,6 @@
 package org.libex.test.logging.log4j;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.fail;
-
-import javax.annotation.ParametersAreNonnullByDefault;
-import javax.annotation.concurrent.ThreadSafe;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -17,13 +13,10 @@ import org.libex.test.TestBase;
 import org.libex.test.hamcrest.IsThrowable;
 import org.libex.test.logging.log4j.Log4jCapturer.LogAssertion;
 
-@ParametersAreNonnullByDefault
-@ThreadSafe
 public class Log4jCapturerTest extends TestBase {
-	
+
 	private static final Logger LOG = Logger.getLogger(Log4jCapturerTest.class);
-	
-	
+
 	@Rule
 	public Log4jCapturer logCapturer = Log4jCapturer.builder().build();
 
@@ -41,89 +34,80 @@ public class Log4jCapturerTest extends TestBase {
 	@After
 	public void tearDown() throws Exception {
 	}
-	
+
 	@Test
-	public void testMessageLogged(){
+	public void testMessageLogged() {
 		logCapturer.assertThat(LogAssertion.newLogAssertion()
-				.withLevel(Level.DEBUG)
-				.isNotLogged());
+				.withLevel(Level.DEBUG).isNotLogged());
+		logCapturer.assertThat(LogAssertion.newLogAssertion().withLevel(
+				Level.INFO));
 		logCapturer.assertThat(LogAssertion.newLogAssertion()
-				.withLevel(Level.INFO));
+				.withLevel(Level.INFO).withRenderedMessage("info message"));
 		logCapturer.assertThat(LogAssertion.newLogAssertion()
-				.withLevel(Level.INFO)
-				.withRenderedMessage("info message"));
-		logCapturer.assertThat(LogAssertion.newLogAssertion()
-				.withLevel(Level.INFO)
-				.withRenderedMessage("info message")
+				.withLevel(Level.INFO).withRenderedMessage("info message")
 				.isLogged());
 		logCapturer.assertThat(LogAssertion.newLogAssertion()
-				.withLevel(Level.INFO)
-				.withRenderedMessage("warn message")
+				.withLevel(Level.INFO).withRenderedMessage("warn message")
 				.isNotLogged());
 
+		logCapturer.assertThat(LogAssertion.newLogAssertion().withLevel(
+				Level.WARN));
 		logCapturer.assertThat(LogAssertion.newLogAssertion()
-				.withLevel(Level.WARN));
+				.withLevel(Level.WARN).withRenderedMessage("warn message"));
 		logCapturer.assertThat(LogAssertion.newLogAssertion()
-				.withLevel(Level.WARN)
-				.withRenderedMessage("warn message"));
-		logCapturer.assertThat(LogAssertion.newLogAssertion()
-				.withLevel(Level.WARN)
-				.withRenderedMessage("warn message")
+				.withLevel(Level.WARN).withRenderedMessage("warn message")
 				.isLogged());
 		logCapturer.assertThat(LogAssertion.newLogAssertion()
-				.withLevel(Level.WARN)
-				.withRenderedMessage("warn message 1 +")
+				.withLevel(Level.WARN).withRenderedMessage("warn message 1 +")
 				.isNotLogged());
 
+		logCapturer.assertThat(LogAssertion.newLogAssertion().withLevel(
+				Level.ERROR));
 		logCapturer.assertThat(LogAssertion.newLogAssertion()
-				.withLevel(Level.ERROR));
+				.withLevel(Level.ERROR).withRenderedMessage("error message"));
 		logCapturer.assertThat(LogAssertion.newLogAssertion()
-				.withLevel(Level.ERROR)
-				.withRenderedMessage("error message"));
-		logCapturer.assertThat(LogAssertion.newLogAssertion()
-				.withLevel(Level.ERROR)
-				.withRenderedMessage("error message")
+				.withLevel(Level.ERROR).withRenderedMessage("error message")
 				.isLogged());
 		logCapturer.assertThat(LogAssertion.newLogAssertion()
-				.withLevel(Level.ERROR)
-				.withRenderedMessage("error message")
-				.withException(instanceOf(RuntimeException.class))
-				.isLogged());
+				.withLevel(Level.ERROR).withRenderedMessage("error message")
+				.withException(instanceOf(RuntimeException.class)).isLogged());
 		logCapturer.assertThat(LogAssertion.newLogAssertion()
 				.withLevel(Level.ERROR)
 				.withRenderedMessage(Matchers.containsString("error message"))
-				.withException(instanceOf(RuntimeException.class))
-				.isLogged());
+				.withException(instanceOf(RuntimeException.class)).isLogged());
 		logCapturer.assertThat(LogAssertion.newLogAssertion()
-				.withLevel(Level.ERROR)
-				.withRenderedMessage("error message")
-				.withException(instanceOf(Exception.class))
-				.isLogged());
+				.withLevel(Level.ERROR).withRenderedMessage("error message")
+				.withException(instanceOf(Exception.class)).isLogged());
 		logCapturer.assertThat(LogAssertion.newLogAssertion()
 				.withLevel(Level.ERROR)
 				.withException(instanceOf(IllegalArgumentException.class))
 				.isNotLogged());
 
-		logCapturer.assertThat(LogAssertion.newLogAssertion()
+		logCapturer
+				.assertThat(LogAssertion
+						.newLogAssertion()
+						.withLevel(Level.ERROR)
+						.withRenderedMessage("error message")
+						.withException(
+								IsThrowable.isThrowable(RuntimeException.class,
+										"test")).isLogged());
+		logCapturer.assertThat(LogAssertion
+				.newLogAssertion()
 				.withLevel(Level.ERROR)
 				.withRenderedMessage("error message")
-				.withException(IsThrowable.isThrowable(RuntimeException.class, "test"))
-				.isLogged());
-		logCapturer.assertThat(LogAssertion.newLogAssertion()
-				.withLevel(Level.ERROR)
-				.withRenderedMessage("error message")
-				.withException(IsThrowable.isThrowable(RuntimeException.class, "test2"))
+				.withException(
+						IsThrowable
+								.isThrowable(RuntimeException.class, "test2"))
 				.isNotLogged());
 	}
-	
+
 	@Test
-	public void testMessageLoggedNot(){
+	public void testMessageLoggedNot() {
 		expectedException.expect(AssertionError.class);
-		
+
 		// test
 		logCapturer.assertThat(LogAssertion.newLogAssertion()
-				.withLevel(Level.INFO)
-				.withRenderedMessage("warn message")
+				.withLevel(Level.INFO).withRenderedMessage("warn message")
 				.isLogged());
 	}
 

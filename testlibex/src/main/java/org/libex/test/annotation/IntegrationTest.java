@@ -4,12 +4,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Indication that a test supplier should return the results as a single
- * PotentialAssigment containing a list of elements.
+ * Marker to be used as a JUnit Category to indicate that a test is considered
+ * an integration test.
  * 
  * @author John Butler
+ * 
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ReturnAsList {
+public @interface IntegrationTest {
 
 }

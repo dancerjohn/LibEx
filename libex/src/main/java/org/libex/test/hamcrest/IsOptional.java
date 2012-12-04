@@ -1,7 +1,8 @@
 package org.libex.test.hamcrest;
 
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.*;
 
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
@@ -36,6 +37,15 @@ public class IsOptional<T> extends TypeSafeMatcher<Optional<T>> {
 	@Factory
 	public static <T> IsOptional<T> presentMatching(Matcher<T> value) {
 		return new IsOptional<T>(true, value);
+	}
+
+	@Factory
+	public static <T> IsOptional<T> ofNullableValue(@Nullable T value) {
+		if (value == null) {
+			return new IsOptional<T>(false);
+		} else {
+			return presentContaining(value);
+		}
 	}
 
 	private final boolean present;

@@ -25,6 +25,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import org.libex.concurrent.DateSupplier;
 
 /**
+ * Overrides {@link DateSupplier} to allow control in a Unit test environment.
+ * 
  * @author John Butler
  * 
  */
@@ -33,7 +35,7 @@ class DateSupplierOverrider extends DateSupplier {
 
 	private static DateSupplierOverrider instance;
 
-	public synchronized static DateSupplierOverrider getInstance() {
+	protected synchronized static DateSupplierOverrider getInstance() {
 		if (null == instance) {
 			DateSupplierOverrider.instance = new DateSupplierOverrider();
 			DateSupplier.setInstance(instance);
@@ -56,15 +58,25 @@ class DateSupplierOverrider extends DateSupplier {
 		return firstNonNull(currentTime, super.getOverridableDate());
 	}
 
-	public void setCurrentTime(Date date) {
+	/**
+	 * Sets the time returned by {@link DateSupplier} to the passed {@code date}
+	 * @param date the {@code Date} to which to set the current time
+	 */
+	void setCurrentTime(Date date) {
 		currentTime = date;
 	}
 
-	public void setCurrentTimeToNow() {
+	/**
+	 * Sets the time returned by {@link DateSupplier} to the current system time
+	 */
+	void setCurrentTimeToNow() {
 		currentTime = super.getOverridableDate();
 	}
 
-	public void reset() {
+	/**
+	 * Resets the {@link DateSupplier} to the default behavior (returning the current time)
+	 */
+	void reset() {
 		currentTime = null;
 	}
 }

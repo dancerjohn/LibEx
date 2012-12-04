@@ -24,6 +24,8 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 /**
+ * Used to control the {@link DateSupplier}  in a unit test environment.
+ * 
  * @author John Butler
  * 
  */
@@ -47,14 +49,24 @@ public class DateController implements TestRule {
 		};
 	}
 
+	/**
+	 * Sets the time returned by {@link DateSupplier} to the passed {@code date}
+	 * @param date the {@code Date} to which to set the current time
+	 */
 	public void setCurrentTime(Date date) {
 		timeProvider.setCurrentTime(date);
 	}
 
+	/**
+	 * Sets the time returned by {@link DateSupplier} to the current system time
+	 */
 	public void setCurrentTimeToNow() {
 		timeProvider.setCurrentTimeToNow();
 	}
 
+	/**
+	 * Resets the {@link DateSupplier} to the default behavior (returning the current time)
+	 */
 	public void reset() {
 		timeProvider.reset();
 	}
