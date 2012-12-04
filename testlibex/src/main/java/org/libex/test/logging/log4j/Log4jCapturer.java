@@ -1,6 +1,7 @@
 package org.libex.test.logging.log4j;
 
 import static com.google.common.base.Predicates.and;
+import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.find;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -26,6 +27,7 @@ import org.libex.logging.log4j.InMemoryAppender;
 import org.libex.logging.log4j.LoggingEventsEx;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
 
 /**
  * @author John Butler
@@ -110,8 +112,14 @@ public class Log4jCapturer implements TestRule {
 	public void clearLog() {
 		appender.clear();
 	}
+	
+	public ImmutableList<LoggingEvent> getLogs(LogAssertion assertion){
 
-	public void assertThat(LogAssertionBuilder assertion) {
+		List<LoggingEvent> logs = appender.getLoggingEvents();
+		return ImmutableList.copyOf(filter(logs, assertion.criteria()));
+	}
+
+	public void assertThat(LogAssertion assertion) {
 
 		List<LoggingEvent> logs = appender.getLoggingEvents();
 		LoggingEvent event = find(logs, assertion.criteria(), null);
@@ -120,10 +128,10 @@ public class Log4jCapturer implements TestRule {
 		MatcherAssert.assertThat(assertion.toString(), event, matcher);
 	}
 
-	public static class LogAssertionBuilder {
+	public static class LogAssertion {
 
-		public static LogAssertionBuilder newLogAssertion() {
-			return new LogAssertionBuilder();
+		public static LogAssertion newLogAssertion() {
+			return new LogAssertion();
 		}
 
 		private boolean logged = true;
@@ -131,30 +139,34 @@ public class Log4jCapturer implements TestRule {
 		private Matcher<? super String> message = Matchers.anything();
 		private Matcher<? super Throwable> exception = Matchers.anything();
 
-		public LogAssertionBuilder isLogged(boolean logged) {
-			this.logged = logged;
+		public LogAssertion isLogged() {
+			this.logged = true;
+			return this;
+		}
+		public LogAssertion isNotLogged() {
+			this.logged = false;
 			return this;
 		}
 
-		public LogAssertionBuilder withLevel(Level level) {
+		public LogAssertion withLevel(Level level) {
 			return withLevel(Matchers.equalTo(level));
 		}
 
-		public LogAssertionBuilder withLevel(Matcher<? super Level> level) {
+		public LogAssertion withLevel(Matcher<? super Level> level) {
 			this.level = level;
 			return this;
 		}
 
-		public LogAssertionBuilder withRenderedMessage(String substring) {
+		public LogAssertion withRenderedMessage(String substring) {
 			return withRenderedMessage(Matchers.containsString(substring));
 		}
 
-		public LogAssertionBuilder withRenderedMessage(Matcher<? super String> message) {
+		public LogAssertion withRenderedMessage(Matcher<? super String> message) {
 			this.message = message;
 			return this;
 		}
 
-		public LogAssertionBuilder withException(Matcher<? super Throwable> exception) {
+		public LogAssertion withException(Matcher<? super Throwable> exception) {
 			this.exception = exception;
 			return this;
 		}
