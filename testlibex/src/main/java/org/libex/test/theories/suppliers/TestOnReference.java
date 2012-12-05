@@ -1,4 +1,4 @@
-package org.libex.test.suppliers;
+package org.libex.test.theories.suppliers;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -7,17 +7,18 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Field;
 import java.util.List;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.experimental.theories.ParameterSignature;
 import org.junit.experimental.theories.ParameterSupplier;
 import org.junit.experimental.theories.ParametersSuppliedBy;
 import org.junit.experimental.theories.PotentialAssignment;
-import org.libex.test.suppliers.TestOnReference.TestOnReferenceSupplier;
+import org.libex.test.theories.suppliers.TestOnReference.TestOnReferenceSupplier;
 
 import com.google.common.base.Strings;
 
 /**
+ * Allows for testing multiple reference values using Theories.
+ * 
  * @author John Butler
  * 
  */
@@ -50,7 +51,8 @@ public @interface TestOnReference {
 			List<PotentialAssignment> result = newArrayList();
 
 			try {
-				TestOnReference testOn = sig.getAnnotation(TestOnReference.class);
+				TestOnReference testOn = sig
+						.getAnnotation(TestOnReference.class);
 				if (testOn != null) {
 					Class<?> type = testOn.type();
 					Object instance = null;
@@ -66,7 +68,8 @@ public @interface TestOnReference {
 						Field field = type.getDeclaredField(name);
 						field.setAccessible(true);
 
-						result.add(PotentialAssignment.forValue(name, field.get(instance)));
+						result.add(PotentialAssignment.forValue(name,
+								field.get(instance)));
 					}
 				}
 			} catch (Exception e) {

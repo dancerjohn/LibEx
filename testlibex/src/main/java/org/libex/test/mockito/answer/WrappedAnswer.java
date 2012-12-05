@@ -23,10 +23,21 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
+/**
+ * An {@link Answer} that allows for wrapping (value(s), Supplier or Answer)
+ * 
+ * @author John Butler
+ * 
+ * @param <T>
+ *            the type of the answer
+ */
 @NotThreadSafe
 @ParametersAreNonnullByDefault
 public class WrappedAnswer<T> implements Answer<T> {
 
+	/**
+	 * @return a new empty {@link WrappedAnswer}
+	 */
 	@Nonnull
 	public static <T> WrappedAnswer<T> create() {
 		return new WrappedAnswer<T>();
@@ -39,17 +50,42 @@ public class WrappedAnswer<T> implements Answer<T> {
 	private final List<TimeSpan> invocationTimeSpans = newArrayList();
 
 	protected WrappedAnswer() {
-
 	}
 
+	/**
+	 * Configures the answer to always return the passed value. This method is
+	 * mutually exclusive from {@link #setValues(Object, Object...)},
+	 * {@link #setAnswer(Answer)} and {@link #setSupplier(Supplier)}.
+	 * 
+	 * @param value
+	 *            the value that the answer should return
+	 * @return this instance
+	 * @throws IllegalStateException
+	 *             if any of the mutually exclusives setters has been called
+	 */
 	@SuppressWarnings("unchecked")
 	@Nonnull
 	public <U extends T> WrappedAnswer<T> setValue(@Nullable U value) {
 		return setValues(value);
 	}
 
+	/**
+	 * Configures the answer to return the passed values for invocations. The
+	 * value returned from each invocation will cycle through the values passed.
+	 * This method is mutually exclusive from {@link #setValue(Object)},
+	 * {@link #setAnswer(Answer)} and {@link #setSupplier(Supplier)}.
+	 * 
+	 * @param value
+	 *            first required value
+	 * @param values
+	 *            any additional values
+	 * @return this instance
+	 * @throws IllegalStateException
+	 *             if any of the mutually exclusives setters has been called
+	 */
 	@Nonnull
-	public <U extends T> WrappedAnswer<T> setValues(@Nullable U value, @Nullable U... values) {
+	public <U extends T> WrappedAnswer<T> setValues(@Nullable U value,
+			@Nullable U... values) {
 		checkNoOptionalsSet();
 
 		@SuppressWarnings("unchecked")
@@ -60,6 +96,17 @@ public class WrappedAnswer<T> implements Answer<T> {
 		return this;
 	}
 
+	/**
+	 * Configures the answer to return the result of the passed answer. This
+	 * method is mutually exclusive from {@link #setValue(Object)},
+	 * {@link #setValues(Object, Object...)} and {@link #setSupplier(Supplier)}.
+	 * 
+	 * @param answer
+	 *            the wrapped answer
+	 * @return this instance
+	 * @throws IllegalStateException
+	 *             if any of the mutually exclusives setters has been called
+	 */
 	@Nonnull
 	public WrappedAnswer<T> setAnswer(Answer<T> answer) {
 		checkNoOptionalsSet();
@@ -68,6 +115,18 @@ public class WrappedAnswer<T> implements Answer<T> {
 		return this;
 	}
 
+	/**
+	 * Configures the answer to return the result of the passed suppler. This
+	 * method is mutually exclusive from {@link #setValue(Object)},
+	 * {@link #setValues(Object, Object...)} and {@link #setAnswer(Answer)}.
+	 * 
+	 * @param supplier
+	 *            the supplier
+	 * @return this instance
+	 * 
+	 * @throws IllegalStateException
+	 *             if any of the mutually exclusives setters has been called
+	 */
 	@Nonnull
 	public WrappedAnswer<T> setSupplier(Supplier<T> supplier) {
 		checkNoOptionalsSet();
@@ -77,11 +136,15 @@ public class WrappedAnswer<T> implements Answer<T> {
 	}
 
 	private void checkNoOptionalsSet() {
-		checkState(!values.isPresent() &&
-				!answer.isPresent() &&
-				!supplier.isPresent(), "Only one behavior may be set: Value, Answer or Supplier");
+		checkState(
+				!values.isPresent() && !answer.isPresent()
+						&& !supplier.isPresent(),
+				"Only one behavior may be set: Value, Answer or Supplier");
 	}
 
+	/**
+	 * @return a list of the duration of each mock invocation
+	 */
 	@Nonnull
 	public ImmutableList<TimeSpan> getInvocationTimeSpans() {
 		return ImmutableList.copyOf(invocationTimeSpans);
@@ -96,10 +159,21 @@ public class WrappedAnswer<T> implements Answer<T> {
 		T result = getResult(invocation);
 
 		watch.stop();
-		invocationTimeSpans.add(new TimeSpan(watch.elapsedMillis(), TimeUnit.MILLISECONDS));
+		invocationTimeSpans.add(new TimeSpan(watch.elapsedMillis(),
+				TimeUnit.MILLISECONDS));
 		return result;
 	}
 
+	/**
+	 * Method to override to alter the behavior of the answer. In general all
+	 * overrides of this method should invoke this method using
+	 * {@code super(invocation)}
+	 * 
+	 * @param invocation
+	 *            the invocation
+	 * @return the value that should be returned for the invocation
+	 * @throws Throwable
+	 */
 	@Nullable
 	protected T getResult(InvocationOnMock invocation) throws Throwable {
 		T result = null;
