@@ -1,5 +1,7 @@
 package org.libex.logging.log4j;
 
+import static com.google.common.base.Preconditions.*;
+
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.NotThreadSafe;
@@ -7,11 +9,14 @@ import javax.annotation.concurrent.NotThreadSafe;
 import org.apache.log4j.Level;
 import org.apache.log4j.spi.LoggingEvent;
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
+import org.libex.test.hamcrest.IsThrowable;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 
 /**
+ * Utilities on {@link LoggingEvent}
+ * 
  * @author John Butler
  * 
  */
@@ -19,17 +24,34 @@ import com.google.common.base.Predicate;
 @ParametersAreNonnullByDefault
 public final class LoggingEventsEx {
 
+	/**
+	 * Creates a {@link Predicate} that matches a {@link LoggingEvent} that has
+	 * the specified level
+	 * 
+	 * @param level
+	 *            the level to match
+	 * @return a {@link Predicate} that matches a {@link LoggingEvent} that has
+	 *         the specified level
+	 */
 	public static Predicate<LoggingEvent> withLevel(final Level level) {
-		return new Predicate<LoggingEvent>() {
+		checkNotNull(level);
 
-			@Override
-			public boolean apply(@Nullable LoggingEvent event) {
-				return event != null && event.getLevel().equals(level);
-			}
-		};
+		return withLevel(Matchers.equalTo(level));
 	}
 
-	public static Predicate<LoggingEvent> withLevel(final Matcher<? super Level> matcher) {
+	/**
+	 * Creates a {@link Predicate} that matches a {@link LoggingEvent} whose
+	 * level matches the passed matcher
+	 * 
+	 * @param matcher
+	 *            the matcher to use
+	 * @return a {@link Predicate} that matches a {@link LoggingEvent} whose
+	 *         level matches the passed matcher
+	 */
+	public static Predicate<LoggingEvent> withLevel(
+			final Matcher<? super Level> matcher) {
+		checkNotNull(matcher);
+
 		return new Predicate<LoggingEvent>() {
 
 			@Override
@@ -39,48 +61,43 @@ public final class LoggingEventsEx {
 		};
 	}
 
-	public static Predicate<LoggingEvent> withRenderedMessage(final String message) {
-		return new Predicate<LoggingEvent>() {
+	public static Predicate<LoggingEvent> withRenderedMessage(
+			final String message) {
+		checkNotNull(message);
 
-			@Override
-			public boolean apply(@Nullable LoggingEvent event) {
-				return event != null && Objects.equal(event.getRenderedMessage(), message);
-			}
-		};
+		return withRenderedMessage(Matchers.equalTo(message));
 	}
 
-	public static Predicate<LoggingEvent> withRenderedMessage(final Matcher<? super String> matcher) {
-		return new Predicate<LoggingEvent>() {
-
-			@Override
-			public boolean apply(@Nullable LoggingEvent event) {
-				return event != null && matcher.matches(event.getRenderedMessage());
-			}
-		};
-	}
-
-	public static Predicate<LoggingEvent> withThrowable(final Class<? extends Throwable> type) {
-		return new Predicate<LoggingEvent>() {
-
-			@Override
-			public boolean apply(@Nullable LoggingEvent event) {
-				return event != null &&
-						event.getThrowableInformation() != null &&
-						event.getThrowableInformation().getThrowable() != null &&
-						type.isAssignableFrom(event.getThrowableInformation().getThrowable().getClass());
-			}
-		};
-	}
-
-	public static Predicate<LoggingEvent> withThrowable(final Matcher<? super Throwable> matcher) {
+	public static Predicate<LoggingEvent> withRenderedMessage(
+			final Matcher<? super String> matcher) {
 		return new Predicate<LoggingEvent>() {
 
 			@Override
 			public boolean apply(@Nullable LoggingEvent event) {
 				return event != null
-						&&
-						matcher.matches((event.getThrowableInformation() == null) ? null : event
-								.getThrowableInformation().getThrowable());
+						&& matcher.matches(event.getRenderedMessage());
+			}
+		};
+	}
+
+	public static Predicate<LoggingEvent> withThrowable(
+			final Class<? extends Throwable> type) {
+		checkNotNull(type);
+
+		return withThrowable(IsThrowable.isThrowableOfType(type));
+	}
+
+	public static Predicate<LoggingEvent> withThrowable(
+			final Matcher<? super Throwable> matcher) {
+		return new Predicate<LoggingEvent>() {
+
+			@Override
+			public boolean apply(@Nullable LoggingEvent event) {
+				return event != null
+						&& matcher
+								.matches((event.getThrowableInformation() == null) ? null
+										: event.getThrowableInformation()
+												.getThrowable());
 			}
 		};
 	}

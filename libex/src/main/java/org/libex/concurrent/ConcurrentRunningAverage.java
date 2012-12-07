@@ -1,6 +1,6 @@
 package org.libex.concurrent;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.*;
 
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -10,6 +10,8 @@ import javax.annotation.concurrent.ThreadSafe;
 import org.libex.math.RunningAverage;
 
 /**
+ * Maintains a running average in a thread-safe manner.
+ * 
  * @author John Butler
  * 
  */
@@ -24,11 +26,25 @@ public class ConcurrentRunningAverage implements RunningAverage {
 	private long eventsRecorded = 0L;
 	private long totalOfValuesInQueue = 0L;
 
+	/**
+	 * @param numberValuesToMaintain
+	 *            the number of the most recent values to include in the running
+	 *            average
+	 */
 	public ConcurrentRunningAverage(int numberValuesToMaintain) {
 		this(numberValuesToMaintain, 0L);
 	}
 
-	public ConcurrentRunningAverage(int numberValuesToMaintain, long numberToSkip) {
+	/**
+	 * @param numberValuesToMaintain
+	 *            the number of the most recent values to include in the running
+	 *            average
+	 * @param numberToSkip
+	 *            the number of initial values to ignore, use this if initial
+	 *            values include setup and therefore skew the average
+	 */
+	public ConcurrentRunningAverage(int numberValuesToMaintain,
+			long numberToSkip) {
 		checkArgument(numberValuesToMaintain > 0);
 		checkArgument(numberToSkip >= 0);
 
@@ -112,11 +128,19 @@ public class ConcurrentRunningAverage implements RunningAverage {
 	@Override
 	public RunningAverageSnapshot getSnapshot() {
 		synchronized (lock) {
-			return new RunningAverageSnapshot(getNumberEventsInAverage(), getNumberEventsRecorded(),
-					getRunningAverage());
+			return new RunningAverageSnapshot(getNumberEventsInAverage(),
+					getNumberEventsRecorded(), getRunningAverage());
 		}
 	}
 
+	/**
+	 * Adds the passed value to the average and returns a snapshot of the
+	 * current average including the new value.
+	 * 
+	 * @param value
+	 *            the value to add
+	 * @return a snapshot of the average including the new value
+	 */
 	public RunningAverageSnapshot addValueAndGetSnapshot(long value) {
 		synchronized (lock) {
 			addValue(value);

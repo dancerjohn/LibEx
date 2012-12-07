@@ -1,6 +1,6 @@
 package org.libex.concurrent;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 
 import java.util.concurrent.TimeUnit;
 
@@ -12,6 +12,8 @@ import com.google.common.base.Objects;
 import com.google.common.primitives.Longs;
 
 /**
+ * Specifies a period of time.
+ * 
  * @author John Butler
  * 
  */
@@ -22,20 +24,41 @@ public final class TimeSpan implements Comparable<TimeSpan> {
 	private final long duration;
 	private final TimeUnit timeUnit;
 
+	/**
+	 * @param duration
+	 *            the number of time units
+	 * @param timeUnit
+	 *            the time unit
+	 */
 	public TimeSpan(long duration, TimeUnit timeUnit) {
 		checkNotNull(timeUnit, "timeUnit may not be null");
 		this.duration = duration;
 		this.timeUnit = timeUnit;
 	}
 
+	/**
+	 * @return the number of time units
+	 */
 	public long getDuration() {
 		return duration;
 	}
 
+	/**
+	 * Gets the number of time units in the specified unit
+	 * 
+	 * @param timeUnit
+	 *            the TimeUnit in which to return the number of units
+	 * @return
+	 * 
+	 * @see TimeUnit#convert(long, TimeUnit)
+	 */
 	public long getDurationIn(TimeUnit timeUnit) {
 		return timeUnit.convert(duration, this.timeUnit);
 	}
 
+	/**
+	 * @return the time unit
+	 */
 	public TimeUnit getTimeUnit() {
 		return timeUnit;
 	}

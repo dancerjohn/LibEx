@@ -3,6 +3,12 @@ package org.libex.concurrent;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.ThreadSafe;
 
+/**
+ * A barrier that will block all thread when closed and allow all thread to
+ * continue when open.
+ * 
+ * @author John Butler
+ */
 @ThreadSafe
 @ParametersAreNonnullByDefault
 public class SimpleBarrier {

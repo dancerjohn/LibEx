@@ -6,10 +6,11 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.ThreadSafe;
 
-
 import com.google.common.primitives.Longs;
 
 /**
+ * Utility methods for {@link Delayed} instances.
+ * 
  * @author John Butler
  * 
  */
@@ -17,6 +18,13 @@ import com.google.common.primitives.Longs;
 @ParametersAreNonnullByDefault
 public final class Delayeds {
 
+	/**
+	 * Creates a {@link Delayed} that will delay for the passed time span
+	 * 
+	 * @param timeSpan
+	 *            the amount of time to delay
+	 * @return a new {@link Delayed} that will delay for the passed time span
+	 */
 	public static Delayed createDelay(TimeSpan timeSpan) {
 		return new DefaultDelay(timeSpan);
 	}
@@ -25,12 +33,14 @@ public final class Delayeds {
 		private final long endTime;
 
 		private DefaultDelay(TimeSpan timeSpan) {
-			endTime = System.nanoTime() + timeSpan.getDurationIn(TimeUnit.NANOSECONDS);
+			endTime = System.nanoTime()
+					+ timeSpan.getDurationIn(TimeUnit.NANOSECONDS);
 		}
 
 		@Override
 		public int compareTo(Delayed o) {
-			return Longs.compare(this.getDelay(TimeUnit.NANOSECONDS), o.getDelay(TimeUnit.NANOSECONDS));
+			return Longs.compare(this.getDelay(TimeUnit.NANOSECONDS),
+					o.getDelay(TimeUnit.NANOSECONDS));
 		}
 
 		@Override

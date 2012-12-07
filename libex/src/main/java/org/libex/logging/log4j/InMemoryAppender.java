@@ -12,8 +12,9 @@ import org.apache.log4j.spi.LoggingEvent;
 import com.google.common.collect.ImmutableList;
 
 /**
- * @author John Butler
+ * Appender that maintains the logging events in memory.
  * 
+ * @author John Butler
  */
 @ThreadSafe
 @ParametersAreNonnullByDefault
@@ -23,7 +24,8 @@ public class InMemoryAppender extends AppenderSkeleton {
 	private final Lock readLock = rwLock.readLock();
 	private final Lock writeLock = rwLock.writeLock();
 
-	private volatile ImmutableList.Builder<LoggingEvent> eventListBuilder = ImmutableList.builder();
+	private volatile ImmutableList.Builder<LoggingEvent> eventListBuilder = ImmutableList
+			.builder();
 
 	@Override
 	public void close() {
@@ -45,6 +47,9 @@ public class InMemoryAppender extends AppenderSkeleton {
 		}
 	}
 
+	/**
+	 * @return the observed logging events
+	 */
 	public ImmutableList<LoggingEvent> getLoggingEvents() {
 		readLock.lock();
 		try {
@@ -54,6 +59,9 @@ public class InMemoryAppender extends AppenderSkeleton {
 		}
 	}
 
+	/**
+	 * Clears the list of observed logging events
+	 */
 	public void clear() {
 		writeLock.lock();
 		try {
