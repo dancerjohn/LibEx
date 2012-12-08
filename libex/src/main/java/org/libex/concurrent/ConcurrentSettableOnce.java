@@ -1,7 +1,9 @@
-package org.libex.base;
+package org.libex.concurrent;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -12,20 +14,24 @@ import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 
 /**
- * A wrapper for a field that should only be set once. After the wrapped value
- * has been set once to a non-null value attempting to set it again will throw
- * an IllegalStateException.
+ * 
+ * A thread-safe wrapper for a field that should only be set once. After the
+ * wrapped value has been set once to a non-null value attempting to set it
+ * again will throw an IllegalStateException.
  * 
  * @author John Butler
+ * 
+ * 
+ * @see org.libex.base.SettableOnce
  */
 @ParametersAreNonnullByDefault
 @NotThreadSafe
-public class SettableOnce<T> implements Supplier<T> {
+public class ConcurrentSettableOnce<T> implements Supplier<T> {
 
-	private Optional<T> value = Optional.absent();
+	private final AtomicReference<T> reference = new AtomicReference<T>();
 	private final String message;
 
-	public SettableOnce() {
+	public ConcurrentSettableOnce() {
 		this.message = "Field cannot be set more than once";
 	}
 
@@ -35,7 +41,7 @@ public class SettableOnce<T> implements Supplier<T> {
 	 * @throws NullPointerException
 	 *             if name is null
 	 */
-	public SettableOnce(String name) {
+	public ConcurrentSettableOnce(String name) {
 		checkNotNull(name);
 
 		this.message = "Field " + name + " cannot be set more than once";
@@ -51,9 +57,7 @@ public class SettableOnce<T> implements Supplier<T> {
 	 *             if input is null
 	 */
 	public void set(T input) {
-		checkState(!value.isPresent(), message);
-
-		value = Optional.of(input);
+		checkState(reference.compareAndSet(null, input), message);
 	}
 
 	/**
@@ -64,9 +68,7 @@ public class SettableOnce<T> implements Supplier<T> {
 	 *             if value has not been set and input is null
 	 */
 	public void setIfAbsent(T input) {
-		if (!value.isPresent()) {
-			value = Optional.of(input);
-		}
+		reference.compareAndSet(null, input);
 	}
 
 	/**
@@ -74,7 +76,7 @@ public class SettableOnce<T> implements Supplier<T> {
 	 */
 	@Nonnull
 	public Optional<T> getOptional() {
-		return value;
+		return Optional.fromNullable(reference.get());
 	}
 
 	/**
@@ -83,7 +85,7 @@ public class SettableOnce<T> implements Supplier<T> {
 	@Override
 	@Nullable
 	public T get() {
-		return value.orNull();
+		return reference.get();
 	}
 
 }
