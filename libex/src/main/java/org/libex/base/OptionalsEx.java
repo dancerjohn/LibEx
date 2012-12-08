@@ -84,5 +84,6 @@ public final class OptionalsEx {
 	}
 
 	private OptionalsEx() {
+		System.out.println("op");
 	}
 }
