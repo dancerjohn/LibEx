@@ -24,7 +24,11 @@ public final class ObjectsEx {
 	 * method. If null is passed, null is returned.
 	 */
 	@Nonnull
-	public static final Function<Object, String> toString = new Function<Object, String>() {
+	public static final Function<Object, String> toStringFunction() {
+		return toString;
+	}
+
+	private static final Function<Object, String> toString = new Function<Object, String>() {
 
 		@Override
 		@Nullable

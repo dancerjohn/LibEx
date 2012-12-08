@@ -50,8 +50,8 @@ public final class OptionalsEx {
 
 			@Override
 			@Nullable
-			public U apply(@Nonnull Optional<? extends U> arg0) {
-				return arg0.orNull();
+			public U apply(@Nonnull Optional<? extends U> optional) {
+				return optional.orNull();
 			}
 		};
 	}
@@ -77,8 +77,8 @@ public final class OptionalsEx {
 
 			@Override
 			@Nonnull
-			public U apply(@Nonnull Optional<U> arg0) {
-				return arg0.or(defaultValue);
+			public U apply(@Nonnull Optional<U> optional) {
+				return optional.or(defaultValue);
 			}
 		};
 	}
