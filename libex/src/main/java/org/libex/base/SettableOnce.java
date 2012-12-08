@@ -14,7 +14,8 @@ import com.google.common.base.Supplier;
 /**
  * A wrapper for a field that should only be set once. After the wrapped value
  * has been set once to a non-null value attempting to set it again will throw
- * an IllegalStateException.
+ * an IllegalStateException. For a thread-safe implementation see
+ * {@link org.libex.concurrent.ConcurrentSettableOnce}
  * 
  * @author John Butler
  */
