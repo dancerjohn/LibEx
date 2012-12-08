@@ -18,5 +18,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Repeat {
+	/**
+	 * @return the number of times the method should be repeated, must be
+	 *         greater than 0
+	 */
 	int count();
 }

@@ -1,7 +1,8 @@
 package org.libex.test.rules;
 
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -21,33 +22,48 @@ import org.libex.test.annotation.Repeat;
 @ThreadSafe
 @ParametersAreNonnullByDefault
 public class RepeatTest implements TestRule {
-	public static RepeatTest repeat() {
+
+	public static RepeatTest findRepeats() {
 		return new RepeatTest();
+	}
+
+	private RepeatTest() {
+		super();
 	}
 
 	@Override
 	public Statement apply(final Statement statement, Description description) {
-		final int repeatCount = getRepeatCount(description);
-		assertThat("Repeat count must be > 0", repeatCount,
-				OrderingComparisons.greaterThan(0));
-
-		return new Statement() {
-
-			@Override
-			public void evaluate() throws Throwable {
-				for (int i = 0; i < repeatCount; i++) {
-					statement.evaluate();
-				}
-			}
-		};
+		return new StatementRepeater(statement, description);
 	}
 
-	private int getRepeatCount(Description description) {
-		Repeat repeat = description.getAnnotation(Repeat.class);
-		int count = 1;
-		if (repeat != null) {
-			count = repeat.count();
+	private final class StatementRepeater extends Statement {
+
+		private final Statement statement;
+		private final int repeatCount;
+
+		private StatementRepeater(Statement statement, Description description) {
+			super();
+			this.statement = statement;
+			Repeat repeat = description.getAnnotation(Repeat.class);
+			this.repeatCount = getRepeatCount(repeat);
 		}
-		return count;
+
+		private final int getRepeatCount(@Nullable Repeat repeat) {
+			int count = 1;
+			if (repeat != null) {
+				count = repeat.count();
+			}
+
+			assertThat("Repeat count must be > 0", count,
+					OrderingComparisons.greaterThan(0));
+			return count;
+		}
+
+		@Override
+		public void evaluate() throws Throwable {
+			for (int i = 0; i < repeatCount; i++) {
+				statement.evaluate();
+			}
+		}
 	}
 }
