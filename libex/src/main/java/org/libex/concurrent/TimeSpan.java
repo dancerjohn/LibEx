@@ -1,6 +1,6 @@
 package org.libex.concurrent;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.concurrent.TimeUnit;
 
@@ -23,6 +23,18 @@ import com.google.common.primitives.Longs;
 public final class TimeSpan implements Comparable<TimeSpan> {
 	private final long duration;
 	private final TimeUnit timeUnit;
+
+	/**
+	 * A time span of a single specified time unit.
+	 * 
+	 * @param timeUnit
+	 *            the time unit
+	 */
+	public TimeSpan(TimeUnit timeUnit) {
+		checkNotNull(timeUnit, "timeUnit may not be null");
+		this.duration = 1;
+		this.timeUnit = timeUnit;
+	}
 
 	/**
 	 * @param duration
