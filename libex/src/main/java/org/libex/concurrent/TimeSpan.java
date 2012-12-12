@@ -12,7 +12,10 @@ import com.google.common.base.Objects;
 import com.google.common.primitives.Longs;
 
 /**
- * Specifies a period of time.
+ * Specifies a period of time. The idea for this class was taken from the Guava
+ * Issues post 631.
+ * 
+ * {@link http://code.google.com/p/guava-libraries/issues/detail?id=631}
  * 
  * @author John Butler
  * 
