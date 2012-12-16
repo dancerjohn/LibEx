@@ -27,6 +27,10 @@ public final class TimeSpan implements Comparable<TimeSpan> {
 	private final long duration;
 	private final TimeUnit timeUnit;
 
+	public TimeSpan(TimeUnit timeUnit) {
+		this(1, timeUnit);
+	}
+
 	/**
 	 * A time span of a single specified time unit.
 	 * 
@@ -71,6 +75,10 @@ public final class TimeSpan implements Comparable<TimeSpan> {
 		return timeUnit.convert(duration, this.timeUnit);
 	}
 
+	public TimeSpan convertTo(TimeUnit timeUnit) {
+		return new TimeSpan(getDurationIn(timeUnit), timeUnit);
+	}
+
 	/**
 	 * @return the time unit
 	 */
@@ -106,5 +114,9 @@ public final class TimeSpan implements Comparable<TimeSpan> {
 	@Override
 	public String toString() {
 		return TimeUnitsEx.toString(duration, timeUnit);
+	}
+
+	public String toString(TimeUnit outputTimeUnit) {
+		return TimeUnitsEx.toString(duration, outputTimeUnit);
 	}
 }

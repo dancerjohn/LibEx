@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+	<bean id="profiled" class="org.libex.examples.aop.Profiled" />
+
+	<bean id="profiler" class="org.libex.concurrent.profile.Profiler"/>
+
+	<bean id="allEventloggingProfiler" class="org.libex.concurrent.profile.LoggingProfiler">
+		<constructor-arg>
+			<bean class="org.libex.concurrent.profile.LoggingProfiler.Config">
+				<property name="delegate" ref="profiler" />
+				<property name="level" value="DEBUG" />
+				<property name="loggingTimeUnit" value="MILLISECONDS" />
+			</bean>
+		</constructor-arg>
+	</bean>
+
+	<bean id="filteringProfiler" class="org.libex.concurrent.profile.ThresholdNotificationProfiler">
+		<constructor-arg>
+			<bean class="org.libex.concurrent.profile.ThresholdNotificationProfiler.Config">
+				<property name="delegate" ref="allEventloggingProfiler" />
+				<property name="thresholdForNotification">
+					<bean class="org.libex.concurrent.TimeSpan">
+						<constructor-arg value="2" />
+						<constructor-arg value="SECONDS" />
+					</bean>
+				</property>
+			</bean>
+		</constructor-arg>
+	</bean>
+
+	<bean id="loggingProfiler" class="org.libex.concurrent.profile.LoggingProfiler">
+		<constructor-arg>
+			<bean class="org.libex.concurrent.profile.LoggingProfiler.Config">
+				<property name="delegate" ref="filteringProfiler" />
+				<property name="level" value="INFO" />
+				<property name="loggingTimeUnit" value="SECONDS" />
+			</bean>
+		</constructor-arg>
+	</bean>
+
+	<bean id="profilerAspect" class="org.libex.aop.ProceedingJoinPointToCallable">
+		<constructor-arg ref="loggingProfiler" />
+	</bean>
+	<aop:config>
+		<aop:pointcut id="businessService"
+			expression="execution(* org.libex.examples.aop.Profiled.*())" />
+
+		<aop:aspect id="profilerAsp" ref="profilerAspect">
+			<aop:around pointcut-ref="businessService" method="doBasicProfiling" />
+		</aop:aspect>
+	</aop:config>
+
+</beans>
