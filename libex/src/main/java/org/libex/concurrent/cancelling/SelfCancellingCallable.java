@@ -1,5 +1,6 @@
 package org.libex.concurrent.cancelling;
 
+import java.util.Timer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledFuture;
 
@@ -21,6 +22,7 @@ public class SelfCancellingCallable<T> implements Callable<T> {
 
 	private final Callable<T> wrappedCallable;
 	private final TimeSpan timeout;
+	@Nullable
 	private final ListeningScheduledExecutorService executorService;
 	private final Object lock = new Object();
 
@@ -28,8 +30,14 @@ public class SelfCancellingCallable<T> implements Callable<T> {
 	private ScheduledFuture<?> cancellingfuture = null;
 	@Nullable
 	private Thread callableThread = null;
+	@Nullable
+	private Timer timer = null;
 
-	public SelfCancellingCallable(Callable<T> wrappedCallable, TimeSpan timeout, ListeningScheduledExecutorService executorService) {
+	public SelfCancellingCallable(Callable<T> wrappedCallable, TimeSpan timeout) {
+		this(wrappedCallable, timeout, null);
+	}
+
+	public SelfCancellingCallable(Callable<T> wrappedCallable, TimeSpan timeout, @Nullable ListeningScheduledExecutorService executorService) {
 		super();
 		this.wrappedCallable = wrappedCallable;
 		this.timeout = timeout;
