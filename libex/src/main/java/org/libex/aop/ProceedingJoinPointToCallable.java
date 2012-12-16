@@ -6,6 +6,12 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.libex.concurrent.Caller;
 
 /**
+ * Converts an Around pointcut into a Callable and passes it to a configured
+ * Callable executor for execution.
+ * <p/>
+ * This class can be used in conjuction with
+ * {@link org.libex.concurrent.profile.Profiler} to profile method calls.
+ * 
  * NOTE: The AspectJ-RT (aspectjrt) dependancy needed to compile this class has
  * been included with provided scope. In order to use this class, this
  * dependancy must be provided by the user at run-time.

@@ -46,6 +46,7 @@ public class WrappedAnswer<T> implements Answer<T> {
 	private Optional<Iterator<T>> values = Optional.absent();
 	private Optional<Answer<T>> answer = Optional.absent();
 	private Optional<Supplier<T>> supplier = Optional.absent();
+	private Optional<Throwable> throwable = Optional.absent();
 
 	private final List<TimeSpan> invocationTimeSpans = newArrayList();
 
@@ -135,11 +136,21 @@ public class WrappedAnswer<T> implements Answer<T> {
 		return this;
 	}
 
+	@Nonnull
+	public WrappedAnswer<T> setThrowable(Throwable throwable) {
+		checkNoOptionalsSet();
+
+		this.throwable = Optional.of(throwable);
+		return this;
+	}
+
 	private void checkNoOptionalsSet() {
 		checkState(
-				!values.isPresent() && !answer.isPresent()
-						&& !supplier.isPresent(),
-				"Only one behavior may be set: Value, Answer or Supplier");
+				!values.isPresent()
+						&& !answer.isPresent()
+						&& !supplier.isPresent()
+						&& !throwable.isPresent(),
+				"Only one behavior may be set: Value, Answer, Throwable or Supplier");
 	}
 
 	/**
@@ -184,6 +195,8 @@ public class WrappedAnswer<T> implements Answer<T> {
 			result = supplier.get().get();
 		} else if (answer.isPresent()) {
 			result = answer.get().answer(invocation);
+		} else if (throwable.isPresent()) {
+			throw throwable.get();
 		}
 
 		return result;

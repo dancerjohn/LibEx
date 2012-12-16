@@ -10,7 +10,6 @@ import javax.annotation.concurrent.ThreadSafe;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.libex.concurrent.TimeSpan;
-import org.libex.concurrent.profile.Profiler.TimedResult;
 
 /**
  * @author John Butler
@@ -48,7 +47,7 @@ public class LoggingProfiler extends ProfilingDecorator {
 	}
 
 	@Override
-	public void processProfileEvent(TimedResult result) {
+	public void processProfileEvent(ProfileResult result) {
 		TimeSpan timeSpan = result.getTimeSpan();
 
 		if (outputTimeUnit != null) {

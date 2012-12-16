@@ -46,6 +46,7 @@ public class WrappedAnswer<T> implements Answer<T> {
 	private Optional<Iterator<T>> values = Optional.absent();
 	private Optional<Answer<T>> answer = Optional.absent();
 	private Optional<Supplier<T>> supplier = Optional.absent();
+	private Optional<Throwable> throwable = Optional.absent();
 
 	private final List<TimeSpan> invocationTimeSpans = newArrayList();
 
@@ -55,7 +56,8 @@ public class WrappedAnswer<T> implements Answer<T> {
 	/**
 	 * Configures the answer to always return the passed value. This method is
 	 * mutually exclusive from {@link #setValues(Object, Object...)},
-	 * {@link #setAnswer(Answer)} and {@link #setSupplier(Supplier)}.
+	 * {@link #setAnswer(Answer)}, {@link #setThrowable(Throwable)} and
+	 * {@link #setSupplier(Supplier)}.
 	 * 
 	 * @param value
 	 *            the value that the answer should return
@@ -73,7 +75,8 @@ public class WrappedAnswer<T> implements Answer<T> {
 	 * Configures the answer to return the passed values for invocations. The
 	 * value returned from each invocation will cycle through the values passed.
 	 * This method is mutually exclusive from {@link #setValue(Object)},
-	 * {@link #setAnswer(Answer)} and {@link #setSupplier(Supplier)}.
+	 * {@link #setAnswer(Answer)}, {@link #setThrowable(Throwable)} and
+	 * {@link #setSupplier(Supplier)}.
 	 * 
 	 * @param value
 	 *            first required value
@@ -99,7 +102,8 @@ public class WrappedAnswer<T> implements Answer<T> {
 	/**
 	 * Configures the answer to return the result of the passed answer. This
 	 * method is mutually exclusive from {@link #setValue(Object)},
-	 * {@link #setValues(Object, Object...)} and {@link #setSupplier(Supplier)}.
+	 * {@link #setValues(Object, Object...)}, {@link #setThrowable(Throwable)}
+	 * and {@link #setSupplier(Supplier)}.
 	 * 
 	 * @param answer
 	 *            the wrapped answer
@@ -118,7 +122,8 @@ public class WrappedAnswer<T> implements Answer<T> {
 	/**
 	 * Configures the answer to return the result of the passed suppler. This
 	 * method is mutually exclusive from {@link #setValue(Object)},
-	 * {@link #setValues(Object, Object...)} and {@link #setAnswer(Answer)}.
+	 * {@link #setValues(Object, Object...)}, {@link #setThrowable(Throwable)}
+	 * and {@link #setAnswer(Answer)}.
 	 * 
 	 * @param supplier
 	 *            the supplier
@@ -135,11 +140,34 @@ public class WrappedAnswer<T> implements Answer<T> {
 		return this;
 	}
 
+	/**
+	 * Configures the answer to throw the passed Throable. This method is
+	 * mutually exclusive from {@link #setValue(Object)},
+	 * {@link #setValues(Object, Object...)}, {@link #setAnswer(Answer)} and
+	 * {@link #setSupplier(Supplier)}.
+	 * 
+	 * @param supplier
+	 *            the supplier
+	 * @return this instance
+	 * 
+	 * @throws IllegalStateException
+	 *             if any of the mutually exclusives setters has been called
+	 */
+	@Nonnull
+	public WrappedAnswer<T> setThrowable(Throwable throwable) {
+		checkNoOptionalsSet();
+
+		this.throwable = Optional.of(throwable);
+		return this;
+	}
+
 	private void checkNoOptionalsSet() {
 		checkState(
-				!values.isPresent() && !answer.isPresent()
-						&& !supplier.isPresent(),
-				"Only one behavior may be set: Value, Answer or Supplier");
+				!values.isPresent()
+						&& !answer.isPresent()
+						&& !supplier.isPresent()
+						&& !throwable.isPresent(),
+				"Only one behavior may be set: Value, Answer, Throwable or Supplier");
 	}
 
 	/**
@@ -184,6 +212,8 @@ public class WrappedAnswer<T> implements Answer<T> {
 			result = supplier.get().get();
 		} else if (answer.isPresent()) {
 			result = answer.get().answer(invocation);
+		} else if (throwable.isPresent()) {
+			throw throwable.get();
 		}
 
 		return result;

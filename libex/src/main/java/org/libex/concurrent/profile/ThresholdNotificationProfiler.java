@@ -1,15 +1,17 @@
 package org.libex.concurrent.profile;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.ThreadSafe;
 
 import org.libex.concurrent.TimeSpan;
-import org.libex.concurrent.profile.Profiler.TimedResult;
 
 /**
+ * A Profiling that is used to filter Profiling notifications to those whose
+ * time vales exceed some threshold.
+ * 
  * @author John Butler
  * 
  */
@@ -35,7 +37,7 @@ public class ThresholdNotificationProfiler extends ProfilingDecorator {
 	}
 
 	@Override
-	public void processProfileEvent(TimedResult result) {
+	public void processProfileEvent(ProfileResult result) {
 		if (thresholdMet(result.getTimeSpan())) {
 			super.processProfileEvent(result);
 		}
