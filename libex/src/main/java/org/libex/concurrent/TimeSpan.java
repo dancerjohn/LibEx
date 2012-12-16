@@ -27,10 +27,6 @@ public final class TimeSpan implements Comparable<TimeSpan> {
 	private final long duration;
 	private final TimeUnit timeUnit;
 
-	public TimeSpan(TimeUnit timeUnit) {
-		this(1, timeUnit);
-	}
-
 	/**
 	 * A time span of a single specified time unit.
 	 * 

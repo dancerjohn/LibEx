@@ -9,6 +9,7 @@ import javax.annotation.concurrent.ThreadSafe;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.libex.concurrent.TimeSpan;
 import org.libex.concurrent.cancelling.SelfCancellingCallable;
@@ -16,6 +17,7 @@ import org.libex.test.TestBase;
 
 @ParametersAreNonnullByDefault
 @ThreadSafe
+@Ignore
 public class SelfCancellingCallableTest extends TestBase {
 
 	@Before
