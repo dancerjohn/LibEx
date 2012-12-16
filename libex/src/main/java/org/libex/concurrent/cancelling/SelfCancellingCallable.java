@@ -1,8 +1,11 @@
 package org.libex.concurrent.cancelling;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -13,6 +16,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import org.libex.concurrent.TimeSpan;
 
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
 /**
  * @author John Butler
@@ -41,11 +45,13 @@ public class SelfCancellingCallable<T> implements Callable<T> {
 		this(wrappedCallable, timeout, null);
 	}
 
-	public SelfCancellingCallable(Callable<T> wrappedCallable, TimeSpan timeout, @Nullable ListeningScheduledExecutorService executorService) {
-		super();
+	public SelfCancellingCallable(Callable<T> wrappedCallable, TimeSpan timeout, @Nullable ScheduledExecutorService executorService) {
+		checkNotNull(wrappedCallable, "callable");
+		checkNotNull(timeout, "timeout");
+
 		this.wrappedCallable = wrappedCallable;
 		this.timeout = timeout;
-		this.executorService = executorService;
+		this.executorService = (executorService == null) ? null : MoreExecutors.listeningDecorator(executorService);
 		this.timer = (executorService == null) ? new Timer() : null;
 	}
 
@@ -89,7 +95,7 @@ public class SelfCancellingCallable<T> implements Callable<T> {
 		}
 	}
 
-	private class Canceller extends TimerTask implements Runnable {
+	private class Canceller extends TimerTask {
 
 		@Override
 		public void run() {
