@@ -1,6 +1,6 @@
 package org.libex.test.theories.suppliers;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.*;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -65,11 +65,15 @@ public @interface TestOnReference {
 					}
 
 					for (String name : testOn.fields()) {
-						Field field = type.getDeclaredField(name);
-						field.setAccessible(true);
+						Object testable = null;
 
-						result.add(PotentialAssignment.forValue(name,
-								field.get(instance)));
+						if (!Strings.isNullOrEmpty(name) && !name.equals("null")) {
+							Field field = type.getDeclaredField(name);
+							field.setAccessible(true);
+							testable = field.get(instance);
+						}
+
+						result.add(PotentialAssignment.forValue(name, testable));
 					}
 				}
 			} catch (Exception e) {

@@ -1,6 +1,6 @@
 package org.libex.test.theories.suppliers;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.*;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -17,6 +17,7 @@ import org.libex.test.theories.suppliers.TestOn.TestOnSupplier;
  * follows:
  * 
  * {@code @Thoery public void test(@TestOn(ints= 2,3,4} int value1,
+ * 
  * @TestOn(booleans={true, false} boolean bool)}
  * 
  * @author John Butler
@@ -77,7 +78,7 @@ public @interface TestOn {
 							Boolean.toString(i), i));
 				}
 				for (String i : testOn.strings()) {
-					result.add(PotentialAssignment.forValue(i, i));
+					result.add(PotentialAssignment.forValue(i, ("null".equals(i)) ? null : i));
 				}
 			}
 
