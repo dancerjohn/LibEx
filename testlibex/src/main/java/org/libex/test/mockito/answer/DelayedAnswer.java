@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import org.libex.concurrent.TimeSpan;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 /**
  * A {@link WrappedAnswer} that delays the response from the mock invocation by
@@ -25,21 +26,33 @@ public class DelayedAnswer<T> extends WrappedAnswer<T> {
 	 * @return the new answer
 	 */
 	public static <T> DelayedAnswer<T> create(TimeSpan timeSpan) {
-		return new DelayedAnswer<T>(timeSpan);
+		return new DelayedAnswer<T>(null, timeSpan);
+	}
+
+	/**
+	 * Creates a {@link DelayedAnswer} that delays the specified time span
+	 * 
+	 * @param delegate
+	 *            the Answer to wrap
+	 * @param timeSpan
+	 *            the amount of time the answer should delay before returning
+	 *            from the invocation
+	 * @return the new answer
+	 */
+	public static <T> DelayedAnswer<T> create(@Nullable Answer<T> delegate, TimeSpan timeSpan) {
+		return new DelayedAnswer<T>(delegate, timeSpan);
 	}
 
 	private final TimeSpan timeSpan;
 
-	private DelayedAnswer(TimeSpan timeSpan) {
-		super();
+	private DelayedAnswer(@Nullable Answer<T> delegate, TimeSpan timeSpan) {
+		super(delegate);
 		this.timeSpan = timeSpan;
 	}
 
 	@Override
-	@Nullable
-	protected T getResult(InvocationOnMock invocation) throws Throwable {
+	protected void preProcess(InvocationOnMock invocation) throws Throwable {
 		Thread.sleep(timeSpan.getDurationIn(TimeUnit.MILLISECONDS));
-		return super.getResult(invocation);
+		super.preProcess(invocation);
 	}
-
 }

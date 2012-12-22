@@ -6,6 +6,7 @@ import javax.annotation.concurrent.ThreadSafe;
 
 import org.libex.concurrent.SimpleBarrier;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 /**
  * A {@link WrappedAnswer} that if closed will block the mock invocation until
@@ -22,13 +23,22 @@ public class BarrierredAnswer<T> extends WrappedAnswer<T> {
 	 * @return a new open {@link BarrierredAnswer}
 	 */
 	public static <T> BarrierredAnswer<T> create() {
-		return new BarrierredAnswer<T>();
+		return new BarrierredAnswer<T>(null);
+	}
+
+	/**
+	 * @param delegate
+	 *            the Answer to wrap
+	 * @return a new open {@link BarrierredAnswer} wrapping the passed delegate
+	 */
+	public static <T> BarrierredAnswer<T> create(@Nullable Answer<T> delegate) {
+		return new BarrierredAnswer<T>(delegate);
 	}
 
 	private final SimpleBarrier barrier = new SimpleBarrier();
 
-	private BarrierredAnswer() {
-		super();
+	private BarrierredAnswer(@Nullable Answer<T> delegate) {
+		super(delegate);
 		barrier.open();
 	}
 
@@ -50,10 +60,8 @@ public class BarrierredAnswer<T> extends WrappedAnswer<T> {
 	}
 
 	@Override
-	@Nullable
-	protected T getResult(InvocationOnMock invocation) throws Throwable {
+	protected void preProcess(InvocationOnMock invocation) throws Throwable {
 		barrier.await();
-		return super.getResult(invocation);
+		super.preProcess(invocation);
 	}
-
 }

@@ -8,6 +8,7 @@ import javax.annotation.concurrent.ThreadSafe;
 
 import org.libex.concurrent.TimeSpan;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 /**
  * A {@link WrappedAnswer} that allows a unit test to wait until the mock has
@@ -25,7 +26,17 @@ public class CountDownLatchAnswer<T> extends WrappedAnswer<T> {
 	 *         {@link #await()} after 1 invocation of the mock.
 	 */
 	public static <T> CountDownLatchAnswer<T> create() {
-		return new CountDownLatchAnswer<T>(1);
+		return new CountDownLatchAnswer<T>(null, 1);
+	}
+
+	/**
+	 * @param delegate
+	 *            the Answer to wrap
+	 * @return a new {@link CountDownLatchAnswer} that will return from
+	 *         {@link #await()} after 1 invocation of the mock.
+	 */
+	public static <T> CountDownLatchAnswer<T> create(@Nullable Answer<T> delegate) {
+		return new CountDownLatchAnswer<T>(delegate, 1);
 	}
 
 	/**
@@ -36,15 +47,28 @@ public class CountDownLatchAnswer<T> extends WrappedAnswer<T> {
 	 *         the mock.
 	 */
 	public static <T> CountDownLatchAnswer<T> create(int numberOfInvocations) {
-		return new CountDownLatchAnswer<T>(numberOfInvocations);
+		return new CountDownLatchAnswer<T>(null, numberOfInvocations);
+	}
+
+	/**
+	 * @param delegate
+	 *            the Answer to wrap
+	 * @param numberOfInvocations
+	 *            the number of invocation for which to block {@link #await()}
+	 * @return a new {@link CountDownLatchAnswer} that will return from
+	 *         {@link #await()} after {@code numberOfInvocations} invocation of
+	 *         the mock.
+	 */
+	public static <T> CountDownLatchAnswer<T> create(@Nullable Answer<T> delegate, int numberOfInvocations) {
+		return new CountDownLatchAnswer<T>(delegate, numberOfInvocations);
 	}
 
 	private final Object lock = new Object();
 	private volatile int numberOfInvocationsToExpect;
 	private volatile CountDownLatch countDownLatch;
 
-	private CountDownLatchAnswer(int numberOfInvocationsToExpect) {
-		super();
+	private CountDownLatchAnswer(@Nullable Answer<T> delegate, int numberOfInvocationsToExpect) {
+		super(delegate);
 		this.numberOfInvocationsToExpect = numberOfInvocationsToExpect;
 		this.countDownLatch = new CountDownLatch(numberOfInvocationsToExpect);
 	}
@@ -113,12 +137,10 @@ public class CountDownLatchAnswer<T> extends WrappedAnswer<T> {
 	}
 
 	@Override
-	@Nullable
-	protected T getResult(InvocationOnMock invocation) throws Throwable {
+	protected void preProcess(InvocationOnMock invocation) throws Throwable {
 		synchronized (lock) {
 			countDownLatch.countDown();
 		}
-		return super.getResult(invocation);
+		super.preProcess(invocation);
 	}
-
 }
