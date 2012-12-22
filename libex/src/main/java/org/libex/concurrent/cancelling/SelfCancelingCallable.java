@@ -1,6 +1,6 @@
 package org.libex.concurrent.cancelling;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -24,7 +24,7 @@ import com.google.common.util.concurrent.MoreExecutors;
  */
 @ParametersAreNonnullByDefault
 @ThreadSafe
-public class SelfCancellingCallable<T> implements Callable<T> {
+public class SelfCancelingCallable<T> implements Callable<T> {
 
 	private final Callable<T> wrappedCallable;
 	private final TimeSpan timeout;
@@ -41,18 +41,22 @@ public class SelfCancellingCallable<T> implements Callable<T> {
 	@Nullable
 	private TimerTask cancellingTask;
 
-	public SelfCancellingCallable(Callable<T> wrappedCallable, TimeSpan timeout) {
-		this(wrappedCallable, timeout, null);
+	public SelfCancelingCallable(Callable<T> wrappedCallable, TimeSpan timeout, Timer timer) {
+		this(wrappedCallable, timeout, checkNotNull(timer, "timer"), null);
 	}
 
-	public SelfCancellingCallable(Callable<T> wrappedCallable, TimeSpan timeout, @Nullable ScheduledExecutorService executorService) {
+	public SelfCancelingCallable(Callable<T> wrappedCallable, TimeSpan timeout, ScheduledExecutorService executorService) {
+		this(wrappedCallable, timeout, null, checkNotNull(executorService, "executorService"));
+	}
+
+	private SelfCancelingCallable(Callable<T> wrappedCallable, TimeSpan timeout, @Nullable Timer timer, @Nullable ScheduledExecutorService executorService) {
 		checkNotNull(wrappedCallable, "callable");
 		checkNotNull(timeout, "timeout");
 
 		this.wrappedCallable = wrappedCallable;
 		this.timeout = timeout;
 		this.executorService = (executorService == null) ? null : MoreExecutors.listeningDecorator(executorService);
-		this.timer = (executorService == null) ? new Timer() : null;
+		this.timer = timer;
 	}
 
 	@Override
