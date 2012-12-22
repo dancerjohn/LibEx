@@ -19,6 +19,9 @@ import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
 /**
+ * A Callable that will cancel itself after it has been running for a specified
+ * time span.
+ * 
  * @author John Butler
  * 
  */
@@ -28,18 +31,10 @@ public class SelfCancelingCallable<T> implements Callable<T> {
 
 	private final Callable<T> wrappedCallable;
 	private final TimeSpan timeout;
-	private final Object lock = new Object();
 	@Nullable
 	private final ListeningScheduledExecutorService executorService;
 	@Nullable
 	private final Timer timer;
-
-	@Nullable
-	private ScheduledFuture<?> cancellingfuture = null;
-	@Nullable
-	private Thread callableThread = null;
-	@Nullable
-	private TimerTask cancellingTask;
 
 	public SelfCancelingCallable(Callable<T> wrappedCallable, TimeSpan timeout, Timer timer) {
 		this(wrappedCallable, timeout, checkNotNull(timer, "timer"), null);
@@ -61,50 +56,65 @@ public class SelfCancelingCallable<T> implements Callable<T> {
 
 	@Override
 	public T call() throws Exception {
-		scheduleCancellation();
+		Canceler canceler = new Canceler();
+		canceler.scheduleCancellation();
 
 		try {
 			return wrappedCallable.call();
 		} finally {
-			markComplete();
+			canceler.markComplete();
 		}
 	}
 
-	private void scheduleCancellation() {
-		callableThread = Thread.currentThread();
-		Canceller canceller = new Canceller();
+	/**
+	 * Use of an inner class allows the SelfCancelingCallable to be used
+	 * multiple times in a thread-safe manner.
+	 */
+	private class Canceler {
+		private final Object lock = new Object();
+		@Nullable
+		private ScheduledFuture<?> cancellingfuture = null;
+		@Nullable
+		private TimerTask cancellingTask = null;
+		@Nullable
+		private Thread callableThread = null;
 
-		if (executorService != null) {
-			cancellingfuture = executorService.schedule(canceller, timeout.getDuration(), timeout.getTimeUnit());
-		} else
-		{
-			timer.schedule(canceller, timeout.getDurationIn(TimeUnit.MILLISECONDS));
-			cancellingTask = canceller;
-		}
-	}
+		private void scheduleCancellation() {
+			callableThread = Thread.currentThread();
+			Canceller canceller = new Canceller();
 
-	private void markComplete() {
-		try {
-			synchronized (lock) {
-				if (cancellingfuture != null) {
-					cancellingfuture.cancel(true);
-				}
-
-				if (cancellingTask != null) {
-					cancellingTask.cancel();
-				}
+			if (executorService != null) {
+				cancellingfuture = executorService.schedule(canceller, timeout.getDuration(), timeout.getTimeUnit());
+			} else
+			{
+				timer.schedule(canceller, timeout.getDurationIn(TimeUnit.MILLISECONDS));
+				cancellingTask = canceller;
 			}
-		} catch (Exception e) {
-			// NO OP
 		}
-	}
 
-	private class Canceller extends TimerTask {
+		private void markComplete() {
+			try {
+				synchronized (lock) {
+					if (cancellingfuture != null) {
+						cancellingfuture.cancel(true);
+					}
 
-		@Override
-		public void run() {
-			synchronized (lock) {
-				callableThread.interrupt();
+					if (cancellingTask != null) {
+						cancellingTask.cancel();
+					}
+				}
+			} catch (Exception e) {
+				// NO OP
+			}
+		}
+
+		private class Canceller extends TimerTask {
+
+			@Override
+			public void run() {
+				synchronized (lock) {
+					callableThread.interrupt();
+				}
 			}
 		}
 	}
