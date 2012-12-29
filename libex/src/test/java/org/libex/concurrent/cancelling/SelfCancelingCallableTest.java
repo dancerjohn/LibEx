@@ -1,4 +1,4 @@
-package org.libex.base.concurrent.cancelling;
+package org.libex.concurrent.cancelling;
 
 import static org.mockito.Mockito.*;
 
@@ -15,20 +15,28 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.libex.concurrent.TimeSpan;
-import org.libex.concurrent.cancelling.SelfCancelingCallable;
 import org.libex.test.TestBase;
 import org.libex.test.mockito.answer.DelayedAnswer;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
 @ParametersAreNonnullByDefault
 @ThreadSafe
 public class SelfCancelingCallableTest extends TestBase {
 
 	private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+	private final ListeningScheduledExecutorService executorServiceList = MoreExecutors
+			.listeningDecorator(executorService);
 
 	@Mock
 	public Callable<String> shortDelay, longDelay, justLongDelay;
+
+	@Mock
+	public CancelingExecutorObserver<String> observer;
 
 	private final TimeSpan cancelTime = new TimeSpan(500, TimeUnit.MILLISECONDS);
 	private final TimeSpan shortTime = new TimeSpan(490, TimeUnit.MILLISECONDS);
@@ -58,22 +66,56 @@ public class SelfCancelingCallableTest extends TestBase {
 
 	@Test
 	public void testCancel_executor() throws Exception {
-		SelfCancelingCallable<String> cancelling = new SelfCancelingCallable<String>(longDelay, cancelTime, executorService);
+		SelfCancelingCallable<String> cancelling = SelfCancelingCallable.<String> newBuilder()
+				.setCallable(longDelay)
+				.setTimeout(cancelTime)
+				.setExecutorService(executorServiceList)
+				.build();
 
 		expectedException.expect(InterruptedException.class);
 
 		cancelling.call();
+	}
+
+	@Test
+	public void testCancel_executorWithObserver() throws Exception {
+		SelfCancelingCallable<String> cancelling = SelfCancelingCallable.<String> newBuilder()
+				.setCallable(longDelay)
+				.setTimeout(cancelTime)
+				.setExecutorService(executorServiceList)
+				.setObserver(observer)
+				.build();
+
+		expectedException.expect(InterruptedException.class);
+
+		try {
+			cancelling.call();
+		} catch (Exception e) {
+			Thread.sleep(50);
+			verify(observer).onTaskCanceled(Mockito.same(longDelay));
+
+			throw e;
+		}
 	}
 
 	@Test
 	public void testNoCancel_executor() throws Exception {
-		SelfCancelingCallable<String> cancelling = new SelfCancelingCallable<String>(shortDelay, cancelTime, executorService);
+		SelfCancelingCallable<String> cancelling = SelfCancelingCallable.<String> newBuilder()
+				.setCallable(shortDelay)
+				.setTimeout(cancelTime)
+				.setExecutorService(executorServiceList)
+				.build();
 		cancelling.call();
+		verifyNoMoreInteractions(observer);
 	}
 
 	@Test
 	public void testCancel_timer() throws Exception {
-		SelfCancelingCallable<String> cancelling = new SelfCancelingCallable<String>(justLongDelay, cancelTime, timer);
+		SelfCancelingCallable<String> cancelling = SelfCancelingCallable.<String> newBuilder()
+				.setCallable(justLongDelay)
+				.setTimeout(cancelTime)
+				.setTimer(timer)
+				.build();
 
 		expectedException.expect(InterruptedException.class);
 
@@ -81,9 +123,35 @@ public class SelfCancelingCallableTest extends TestBase {
 	}
 
 	@Test
+	public void testCancel_timerWithObserver() throws Exception {
+		SelfCancelingCallable<String> cancelling = SelfCancelingCallable.<String> newBuilder()
+				.setCallable(justLongDelay)
+				.setTimeout(cancelTime)
+				.setTimer(timer)
+				.setObserver(observer)
+				.build();
+
+		expectedException.expect(InterruptedException.class);
+
+		try {
+			cancelling.call();
+		} catch (Exception e) {
+			Thread.sleep(50);
+			verify(observer).onTaskCanceled(Mockito.same(justLongDelay));
+
+			throw e;
+		}
+	}
+
+	@Test
 	public void testNoCancel_timer() throws Exception {
-		SelfCancelingCallable<String> cancelling = new SelfCancelingCallable<String>(shortDelay, cancelTime, timer);
+		SelfCancelingCallable<String> cancelling = SelfCancelingCallable.<String> newBuilder()
+				.setCallable(shortDelay)
+				.setTimeout(cancelTime)
+				.setTimer(timer)
+				.build();
 		cancelling.call();
+		verifyNoMoreInteractions(observer);
 	}
 
 }

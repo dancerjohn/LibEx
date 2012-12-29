@@ -27,7 +27,54 @@ import com.google.common.util.concurrent.MoreExecutors;
  */
 @ParametersAreNonnullByDefault
 @ThreadSafe
-public class SelfCancelingCallable<T> implements Callable<T> {
+class SelfCancelingCallable<T> implements Callable<T> {
+
+	static class SelfCancelingCallableBuilder<T> {
+
+		private Callable<T> wrappedCallable;
+		private TimeSpan timeout;
+		private ListeningScheduledExecutorService executorService;
+		private Timer timer;
+		private CancelingExecutorObserver<T> observer;
+
+		public SelfCancelingCallableBuilder<T> setCallable(Callable<T> wrappedCallable) {
+			this.wrappedCallable = wrappedCallable;
+			return this;
+		}
+
+		public SelfCancelingCallableBuilder<T> setTimeout(TimeSpan timeout) {
+			this.timeout = timeout;
+			return this;
+		}
+
+		public SelfCancelingCallableBuilder<T> setExecutorService(ListeningScheduledExecutorService executorService) {
+			this.executorService = executorService;
+			return this;
+		}
+
+		public SelfCancelingCallableBuilder<T> setTimer(Timer timer) {
+			this.timer = timer;
+			return this;
+		}
+
+		public SelfCancelingCallableBuilder<T> setObserver(CancelingExecutorObserver<T> observer) {
+			this.observer = observer;
+			return this;
+		}
+
+		SelfCancelingCallable<T> build() {
+			checkState(wrappedCallable != null);
+			checkState(timeout != null);
+			checkState(executorService != null || timer != null);
+
+			return new SelfCancelingCallable<T>(wrappedCallable,
+					timeout, timer, executorService, observer);
+		}
+	}
+
+	public static <T> SelfCancelingCallableBuilder<T> newBuilder() {
+		return new SelfCancelingCallableBuilder<T>();
+	}
 
 	private final Callable<T> wrappedCallable;
 	private final TimeSpan timeout;
@@ -35,23 +82,20 @@ public class SelfCancelingCallable<T> implements Callable<T> {
 	private final ListeningScheduledExecutorService executorService;
 	@Nullable
 	private final Timer timer;
+	@Nullable
+	private final CancelingExecutorObserver<T> observer;
 
-	public SelfCancelingCallable(Callable<T> wrappedCallable, TimeSpan timeout, Timer timer) {
-		this(wrappedCallable, timeout, checkNotNull(timer, "timer"), null);
-	}
-
-	public SelfCancelingCallable(Callable<T> wrappedCallable, TimeSpan timeout, ScheduledExecutorService executorService) {
-		this(wrappedCallable, timeout, null, checkNotNull(executorService, "executorService"));
-	}
-
-	private SelfCancelingCallable(Callable<T> wrappedCallable, TimeSpan timeout, @Nullable Timer timer, @Nullable ScheduledExecutorService executorService) {
-		checkNotNull(wrappedCallable, "callable");
-		checkNotNull(timeout, "timeout");
+	private SelfCancelingCallable(Callable<T> wrappedCallable,
+			TimeSpan timeout,
+			@Nullable Timer timer,
+			@Nullable ScheduledExecutorService executorService,
+			@Nullable CancelingExecutorObserver<T> observer) {
 
 		this.wrappedCallable = wrappedCallable;
 		this.timeout = timeout;
 		this.executorService = (executorService == null) ? null : MoreExecutors.listeningDecorator(executorService);
 		this.timer = timer;
+		this.observer = observer;
 	}
 
 	@Override
@@ -112,8 +156,20 @@ public class SelfCancelingCallable<T> implements Callable<T> {
 
 			@Override
 			public void run() {
-				synchronized (lock) {
-					callableThread.interrupt();
+				try {
+					synchronized (lock) {
+						callableThread.interrupt();
+					}
+				} catch (Exception e) {
+					// NO OP
+				} finally {
+					if (observer != null) {
+						try {
+							observer.onTaskCanceled(wrappedCallable);
+						} catch (Exception e) {
+							// NO OP
+						}
+					}
 				}
 			}
 		}
