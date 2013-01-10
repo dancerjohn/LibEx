@@ -24,6 +24,55 @@ import com.google.common.primitives.Longs;
 @ThreadSafe
 @Immutable
 public final class TimeSpan implements Comparable<TimeSpan> {
+
+	public static TimeSpan oneNanosecond() {
+		return new TimeSpan(TimeUnit.NANOSECONDS);
+	}
+
+	public static TimeSpan nanosecods(long duration) {
+		return new TimeSpan(duration, TimeUnit.NANOSECONDS);
+	}
+
+	public static TimeSpan oneMicrosecond() {
+		return new TimeSpan(TimeUnit.MICROSECONDS);
+	}
+
+	public static TimeSpan microseconds(long duration) {
+		return new TimeSpan(duration, TimeUnit.MICROSECONDS);
+	}
+
+	public static TimeSpan oneMillisecond() {
+		return new TimeSpan(TimeUnit.MILLISECONDS);
+	}
+
+	public static TimeSpan milliseconds(long duration) {
+		return new TimeSpan(duration, TimeUnit.MILLISECONDS);
+	}
+
+	public static TimeSpan oneSecond() {
+		return new TimeSpan(TimeUnit.SECONDS);
+	}
+
+	public static TimeSpan seconds(long duration) {
+		return new TimeSpan(duration, TimeUnit.SECONDS);
+	}
+
+	public static TimeSpan oneMinute() {
+		return new TimeSpan(TimeUnit.MINUTES);
+	}
+
+	public static TimeSpan minutes(long duration) {
+		return new TimeSpan(duration, TimeUnit.MINUTES);
+	}
+
+	public static TimeSpan oneDay() {
+		return new TimeSpan(TimeUnit.DAYS);
+	}
+
+	public static TimeSpan days(long duration) {
+		return new TimeSpan(duration, TimeUnit.DAYS);
+	}
+
 	private final long duration;
 	private final TimeUnit timeUnit;
 

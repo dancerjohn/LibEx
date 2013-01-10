@@ -1,4 +1,4 @@
-package org.libex.test.hamcrest;
+package org.libex.hamcrest;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 

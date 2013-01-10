@@ -9,8 +9,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.libex.hamcrest.IsThrowable;
 import org.libex.test.TestBase;
-import org.libex.test.hamcrest.IsThrowable;
 import org.libex.test.logging.log4j.Log4jCapturer.LogAssertion;
 
 public class Log4jCapturerTest extends TestBase {

@@ -10,7 +10,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.spi.LoggingEvent;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
-import org.libex.test.hamcrest.IsThrowable;
+import org.libex.hamcrest.IsThrowable;
 
 import com.google.common.base.Predicate;
 

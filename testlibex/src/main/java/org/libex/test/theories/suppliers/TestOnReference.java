@@ -1,9 +1,11 @@
 package org.libex.test.theories.suppliers;
 
-import static com.google.common.collect.Lists.*;
+import static com.google.common.collect.Lists.newArrayList;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.util.List;
 
@@ -24,6 +26,7 @@ import com.google.common.base.Strings;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @ParametersSuppliedBy(TestOnReferenceSupplier.class)
+@Target(ElementType.PARAMETER)
 public @interface TestOnReference {
 	/**
 	 * The class from which to retrieve the fields. Generally this is the test

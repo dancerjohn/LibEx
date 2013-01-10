@@ -1,9 +1,11 @@
 package org.libex.test.theories.suppliers;
 
-import static com.google.common.collect.Lists.*;
+import static com.google.common.collect.Lists.newArrayList;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.List;
 
 import org.junit.experimental.theories.ParameterSignature;
@@ -25,6 +27,7 @@ import org.libex.test.theories.suppliers.TestOn.TestOnSupplier;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @ParametersSuppliedBy(TestOnSupplier.class)
+@Target(ElementType.PARAMETER)
 public @interface TestOn {
 
 	int[] ints() default {};

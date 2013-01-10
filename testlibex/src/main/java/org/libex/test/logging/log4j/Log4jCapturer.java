@@ -23,9 +23,9 @@ import org.hamcrest.StringDescription;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+import org.libex.hamcrest.IsThrowable;
 import org.libex.logging.log4j.InMemoryAppender;
 import org.libex.logging.log4j.LoggingEventsEx;
-import org.libex.test.hamcrest.IsThrowable;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
