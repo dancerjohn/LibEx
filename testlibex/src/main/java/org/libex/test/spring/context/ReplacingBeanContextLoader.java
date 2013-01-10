@@ -22,6 +22,37 @@ import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
+/**
+ * ContextLoader to be used in tests to allow for the replacement of beans into
+ * a Spring context. This is used in conjunction with the
+ * {@link org.springframework.test.context.ContextConfiguration} as the
+ * <b>loader</b>.
+ * <p>
+ * The following annotations are used for determining beans to be injected into
+ * the context:
+ * <p>
+ * {@link ReplaceContextBean}
+ * <p>
+ * {@link GenerateContextBeanReplacements}
+ * <p>
+ * 
+ * <p>
+ * Basic usage:
+ * 
+ * <pre>
+ * &#064;RunWith(SpringJUnit4ClassRunner.class)
+ * &#064;ContextConfiguration(loader = ReplacingBeanContextLoader.class,
+ * 		locations = &quot;classpath:spring/context/contextExample.xml&quot;)
+ * public class MyTest {
+ * 
+ * 	&#064;ReplaceContextBean(name = &quot;class12&quot;, factoryMethod = &quot;createOther2&quot;)
+ * 	public Int1 other2;
+ * }
+ * </pre>
+ * 
+ * @author John Butler
+ * 
+ */
 public class ReplacingBeanContextLoader extends GenericXmlContextLoader {
 
 	private Map<String, Object> beans = Maps.newHashMap();
