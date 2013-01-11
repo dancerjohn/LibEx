@@ -2,7 +2,6 @@ package org.libex.test.rules.duration;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.ThreadSafe;
 
 import org.libex.annotation.DefaultScope;
@@ -13,7 +12,6 @@ import com.google.common.base.Optional;
 /**
  * Credit for the code in package is given to Nelson Llewellyn.
  */
-@ParametersAreNonnullByDefault
 @ThreadSafe
 public enum TestDuration {
 	SHORT("runShortTests", true, TimeSpan.seconds(3)),

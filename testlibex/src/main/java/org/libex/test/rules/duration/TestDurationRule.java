@@ -2,8 +2,6 @@ package org.libex.test.rules.duration;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
-import javax.annotation.concurrent.ThreadSafe;
 
 import org.junit.Assume;
 import org.junit.rules.TestRule;
@@ -19,8 +17,6 @@ import com.google.common.cache.LoadingCache;
 /**
  * Credit for the code in package is given to Nelson Llewellyn.
  */
-@ParametersAreNonnullByDefault
-@ThreadSafe
 public class TestDurationRule implements TestRule {
 
 	private final LoadingCache<TestDuration, Boolean> runTestCache = CacheBuilder.newBuilder()
@@ -40,7 +36,7 @@ public class TestDurationRule implements TestRule {
 		if (classLevelTestDuration == null) {
 			Duration duration = description.getTestClass().getAnnotation(Duration.class);
 			if (duration != null) {
-				classLevelTestDuration = Optional.of(duration.duration());
+				classLevelTestDuration = Optional.of(duration.value());
 			} else {
 				classLevelTestDuration = Optional.absent();
 			}
@@ -87,7 +83,7 @@ public class TestDurationRule implements TestRule {
 			TestDuration testDuration = null;
 			Duration duration = description.getAnnotation(Duration.class);
 			if (duration != null) {
-				testDuration = duration.duration();
+				testDuration = duration.value();
 			}
 
 			return Optional.fromNullable(testDuration);

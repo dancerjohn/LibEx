@@ -1,11 +1,15 @@
 package org.libex.test.rules.duration;
 
-import javax.annotation.concurrent.ThreadSafe;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Credit for the code in package is given to Nelson Llewellyn.
  */
-@ThreadSafe
+@Retention(RetentionPolicy.RUNTIME)
+@Target(value = { ElementType.METHOD, ElementType.TYPE })
 public @interface Duration {
-	TestDuration duration() default TestDuration.SHORT;
+	TestDuration value() default TestDuration.SHORT;
 }
