@@ -1,7 +1,6 @@
 package org.libex.concurrent.profile;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.*;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -11,6 +10,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.ThreadSafe;
 
+import org.apache.log4j.Logger;
 import org.libex.concurrent.TimeSpan;
 
 import com.google.common.base.Stopwatch;
@@ -26,6 +26,8 @@ import com.google.common.base.Stopwatch;
 @ThreadSafe
 @ParametersAreNonnullByDefault
 public class Profiler implements Profiling {
+
+	private static final Logger logger = Logger.getLogger(Profiler.class);
 
 	private final AtomicReference<Callback> callback = new AtomicReference<Profiler.Callback>();
 
@@ -59,6 +61,11 @@ public class Profiler implements Profiling {
 		} finally {
 			TimeSpan timeSpan = new TimeSpan(stopWatch.elapsedTime(TimeUnit.NANOSECONDS), TimeUnit.NANOSECONDS);
 			ProfileResult timedResult = new ProfileResult(timeSpan, callable);
+
+			if (logger.isTraceEnabled()) {
+				logger.trace(timedResult);
+			}
+
 			issueCallback(timedResult, callback, caughtException);
 		}
 	}

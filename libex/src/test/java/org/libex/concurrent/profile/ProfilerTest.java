@@ -1,16 +1,9 @@
 package org.libex.concurrent.profile;
 
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.number.OrderingComparisons.greaterThanOrEqualTo;
-import static org.hamcrest.number.OrderingComparisons.lessThan;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.number.OrderingComparison.*;
+import static org.mockito.Mockito.*;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -153,7 +146,6 @@ public class ProfilerTest extends TestBase {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private void verifyCallableAndCallbackCalled() throws Exception {
 		verify(callable).call();
 		verify(callback).processProfileEvent(captor.capture());

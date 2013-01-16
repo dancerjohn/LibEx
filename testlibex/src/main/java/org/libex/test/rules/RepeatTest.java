@@ -1,12 +1,12 @@
 package org.libex.test.rules;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.MatcherAssert.*;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.ThreadSafe;
 
-import org.hamcrest.number.OrderingComparisons;
+import org.hamcrest.number.OrderingComparison;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -55,7 +55,7 @@ public class RepeatTest implements TestRule {
 			}
 
 			assertThat("Repeat count must be > 0", count,
-					OrderingComparisons.greaterThan(0));
+					OrderingComparison.greaterThan(0));
 			return count;
 		}
 

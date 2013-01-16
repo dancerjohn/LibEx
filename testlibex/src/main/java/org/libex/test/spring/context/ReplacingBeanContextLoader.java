@@ -1,6 +1,6 @@
 package org.libex.test.spring.context;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+	<bean id="profiled" class="org.libex.examples.aop.Profiled" />
+	
+	<bean id="runningAverage" class="org.libex.concurrent.ConcurrentRunningAverage">
+		<constructor-arg value="100"/>
+		<property name="groupingRange" value="10"/>
+	</bean>
+	
+	<bean id="timeSpanCounter" class="org.libex.concurrent.TimeSpanCounter">
+		<constructor-arg>
+			<bean class="org.libex.concurrent.TimeSpan" factory-method="oneSecond"/>
+		</constructor-arg>
+	</bean>
+	
+	<bean id="profilingMetricsLogger" class="org.libex.metrics.ProfilingMetricsLogger">
+		<constructor-arg>
+			<bean class="org.libex.metrics.ProfilingTimeBasedMetrics">
+				<constructor-arg>
+					<bean class="org.libex.metrics.SimpleTimeBasedMetrics">
+						<property name="runningAverage" ref="runningAverage"/>
+						<property name="counter" ref="timeSpanCounter"/>
+					</bean>
+				</constructor-arg>
+				<constructor-arg value="MILLISECONDS"/>
+			</bean>
+		</constructor-arg>
+		<constructor-arg value="1"/>
+		<property name="logRunningAverageCountsInterval" value="10"/>
+	</bean>
+
+	<bean id="profiler" class="org.libex.concurrent.profile.Profiler"
+		p:observer-ref="profilingMetricsLogger"
+	/>
+	
+	<bean id="profilerAspect" class="org.libex.aop.ProceedingJoinPointToCallable">
+		<constructor-arg ref="profiler" />
+	</bean>
+	<aop:config>
+		<aop:pointcut id="businessService"
+			expression="execution(* org.libex.examples.aop.Profiled.*())" />
+
+		<aop:aspect id="profilerAsp" ref="profilerAspect">
+			<aop:around pointcut-ref="businessService" method="doBasicProfiling" />
+		</aop:aspect>
+	</aop:config>
+
+</beans>

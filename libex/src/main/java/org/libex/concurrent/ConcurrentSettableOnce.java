@@ -1,14 +1,13 @@
 package org.libex.concurrent;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.*;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import javax.annotation.concurrent.NotThreadSafe;
+import javax.annotation.concurrent.ThreadSafe;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
@@ -25,11 +24,11 @@ import com.google.common.base.Supplier;
  * @see org.libex.base.SettableOnce
  */
 @ParametersAreNonnullByDefault
-@NotThreadSafe
+@ThreadSafe
 public class ConcurrentSettableOnce<T> implements Supplier<T> {
 
 	private final AtomicReference<T> reference = new AtomicReference<T>();
-	private final String message;
+	private String message;
 
 	public ConcurrentSettableOnce() {
 		this.message = "Field cannot be set more than once";
@@ -86,6 +85,14 @@ public class ConcurrentSettableOnce<T> implements Supplier<T> {
 	@Nullable
 	public T get() {
 		return reference.get();
+	}
+
+	protected String getMessage() {
+		return message;
+	}
+
+	protected void setMessage(String message) {
+		this.message = message;
 	}
 
 }

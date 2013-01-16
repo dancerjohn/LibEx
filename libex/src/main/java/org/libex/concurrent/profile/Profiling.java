@@ -35,6 +35,11 @@ public interface Profiling extends Caller {
 		public Callable<?> getCallable() {
 			return callable;
 		}
+
+		@Override
+		public String toString() {
+			return String.format("%s took %s to execute", callable, timeSpan);
+		}
 	}
 
 	public static interface Callback {

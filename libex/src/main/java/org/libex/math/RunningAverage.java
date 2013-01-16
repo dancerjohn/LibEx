@@ -3,6 +3,9 @@ package org.libex.math;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.NotThreadSafe;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multiset;
+
 /**
  * @author John Butler
  * 
@@ -21,6 +24,8 @@ public interface RunningAverage {
 	long getRunningAverage();
 
 	RunningAverageSnapshot getSnapshot();
+
+	ImmutableSet<Multiset.Entry<Long>> getEventCountSet();
 
 	public static class RunningAverageSnapshot {
 		private final long numberEventsInAverage;
@@ -44,6 +49,12 @@ public interface RunningAverage {
 
 		public long getRunningAverage() {
 			return runningAverage;
+		}
+
+		@Override
+		public String toString() {
+			return String.format("# events recorded = %d, # in average = %d, average = %d", numberEventsRecorded,
+					numberEventsInAverage, runningAverage);
 		}
 	}
 }

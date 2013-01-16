@@ -1,7 +1,6 @@
 package org.libex.base;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,7 +23,7 @@ import com.google.common.base.Supplier;
 public class SettableOnce<T> implements Supplier<T> {
 
 	private Optional<T> value = Optional.absent();
-	private final String message;
+	private String message;
 
 	public SettableOnce() {
 		this.message = "Field cannot be set more than once";
@@ -85,6 +84,14 @@ public class SettableOnce<T> implements Supplier<T> {
 	@Nullable
 	public T get() {
 		return value.orNull();
+	}
+
+	protected String getMessage() {
+		return message;
+	}
+
+	protected void setMessage(String message) {
+		this.message = message;
 	}
 
 }
