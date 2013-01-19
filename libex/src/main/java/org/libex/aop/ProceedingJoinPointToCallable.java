@@ -1,5 +1,7 @@
 package org.libex.aop;
 
+import static com.google.common.base.Preconditions.*;
+
 import java.util.concurrent.Callable;
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -23,12 +25,32 @@ public class ProceedingJoinPointToCallable {
 
 	private final Caller caller;
 
+	/**
+	 * @param caller
+	 *            the object responsible for invoking the join point callable
+	 * @throws NullPointerException
+	 *             if caller is null
+	 */
 	public ProceedingJoinPointToCallable(Caller caller) {
 		super();
-		this.caller = caller;
+		this.caller = checkNotNull(caller);
 	}
 
+	/**
+	 * Accepts a join point, wraps it inside a {@link Callable} and invokes the
+	 * {@code caller} to execute the join point.
+	 * 
+	 * @param pjp
+	 *            the join point to be executed
+	 * @return the result of invoking the join point
+	 * @throws Throwable
+	 *             if the execution of the join point throws
+	 * @throws NullPointerException
+	 *             if pjp is null
+	 */
 	public Object doBasicProfiling(final ProceedingJoinPoint pjp) throws Throwable {
+		checkNotNull(pjp);
+
 		Callable<Object> callable = new Callable<Object>() {
 
 			@Override
@@ -38,7 +60,7 @@ public class ProceedingJoinPointToCallable {
 				} catch (Exception e) {
 					throw e;
 				} catch (Throwable t) {
-					throw new RuntimeException(t);
+					throw new Exception(t);
 				}
 			}
 

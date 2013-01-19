@@ -18,20 +18,40 @@ import javax.annotation.concurrent.NotThreadSafe;
 @NotThreadSafe
 public class FinalizableSettableOnce<T> extends SettableOnce<T> {
 
-	private boolean mayBeSet = true;
-
-	public FinalizableSettableOnce() {
-		super();
+	/**
+	 * @return a new empty {@link SettableOnce}
+	 */
+	public static <T> FinalizableSettableOnce<T> empty() {
+		return new FinalizableSettableOnce<T>("Field cannot be set more than once");
 	}
 
 	/**
 	 * @param name
 	 *            the name of the field to be included in error messages
+	 * @return a new empty {@link SettableOnce}
 	 * @throws NullPointerException
 	 *             if name is null
 	 */
-	public FinalizableSettableOnce(String name) {
-		super(name);
+	public static <T> FinalizableSettableOnce<T> withName(String name) {
+		checkNotNull(name);
+		return new FinalizableSettableOnce<T>("Field " + name + " cannot be set more than once");
+	}
+
+	/**
+	 * @param message
+	 *            the error message to use
+	 * @return a new empty {@link SettableOnce}
+	 * @throws NullPointerException
+	 *             if message is null
+	 */
+	public static <T> FinalizableSettableOnce<T> withMessage(String message) {
+		return new FinalizableSettableOnce<T>(message);
+	}
+
+	private boolean mayBeSet = true;
+
+	private FinalizableSettableOnce(String message) {
+		super(message);
 	}
 
 	/**
@@ -64,8 +84,10 @@ public class FinalizableSettableOnce<T> extends SettableOnce<T> {
 		}
 	}
 
-	@Override
-	public void finalize() {
+	/**
+	 * Marks this instance as no longer being setting.
+	 */
+	public void makeImmutable() {
 		mayBeSet = false;
 		setMessage(getMessage().replace(" cannot be set more than once", " has been finalized"));
 	}
