@@ -9,10 +9,24 @@ import javax.annotation.concurrent.ThreadSafe;
 
 import com.google.common.base.Defaults;
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 
 @ParametersAreNonnullByDefault
 @ThreadSafe
 public final class StringsEx {
+
+	private static final Predicate<String> isNullOrEmpty = new Predicate<String>() {
+
+		@Override
+		public boolean apply(@Nullable String input) {
+			return Strings.isNullOrEmpty(input);
+		}
+	};
+
+	public static Predicate<String> isNullOrEmpty() {
+		return isNullOrEmpty;
+	}
 
 	/**
 	 * Creates a Function that formats the object passed to the Function using
@@ -27,6 +41,7 @@ public final class StringsEx {
 	@Nonnull
 	public static Function<Object, String> formatter(final String format) {
 		checkNotNull(format);
+		String.format(format, (Object) null);
 
 		return new Function<Object, String>() {
 
@@ -54,8 +69,8 @@ public final class StringsEx {
 	 *         the passed format
 	 */
 	@Nonnull
-	public static <T> Function<? extends T, String> formatter(
-			final String format, Class<T> type) {
+	public static <T> Function<T, String> formatter(
+			final String format, Class<? extends T> type) {
 		checkNotNull(format);
 		checkNotNull(type);
 		String.format(format, Defaults.defaultValue(type));
