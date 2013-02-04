@@ -1,0 +1,13 @@
+org.libex.annotation
+org.libex.aop
+org.libex.base
+org.libex.collect
+org.libex.concurrent
+org.libex.concurrent.cancelling
+org.libex.concurrent.profile
+org.libex.enums
+org.libex.hamcrest
+org.libex.logging.log4j
+org.libex.math
+org.libex.metrics
+org.libex.reflect
