@@ -1,5 +1,7 @@
 package org.libex.collect;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Iterator;
 import java.util.Map;
 
@@ -38,6 +40,9 @@ public final class MapsEx {
 	 */
 	public static <K, V> V getOrInsert(Map<? super K, V> map, K key,
 			Supplier<? extends V> supplier) {
+		checkNotNull(key);
+		checkNotNull(supplier);
+
 		if (map.containsKey(key)) {
 			return map.get(key);
 		} else {
@@ -84,6 +89,8 @@ public final class MapsEx {
 	public static <T, K, V> Map<K, V> uniqueIndex(Iterator<T> input,
 			Function<? super T, ? extends K> keyFunction,
 			Function<? super T, ? extends V> valueFunction) {
+		checkNotNull(keyFunction);
+		checkNotNull(valueFunction);
 
 		Map<K, V> map = Maps.newHashMap();
 		while (input.hasNext()) {
@@ -131,6 +138,8 @@ public final class MapsEx {
 	public static <T, K, V> Map<K, V> multipleIndex(Iterator<T> inputs,
 			Function<? super T, ? extends Iterable<? extends K>> keyFunction,
 			Function<? super T, ? extends V> valueFunction) {
+		checkNotNull(keyFunction);
+		checkNotNull(valueFunction);
 
 		Map<K, V> map = Maps.newHashMap();
 		while (inputs.hasNext()) {
