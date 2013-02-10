@@ -1,8 +1,8 @@
 package org.libex.reflect;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterables.filter;
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.base.Preconditions.*;
+import static com.google.common.collect.Iterables.*;
+import static com.google.common.collect.Lists.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -28,7 +28,8 @@ public final class ReflectionUtils {
 
 	/**
 	 * Gets the list of Methods in the passed type that have all of the passed
-	 * predicates.
+	 * annotations. If the passed list of annotations is empty, all methods will
+	 * be returned.
 	 * 
 	 * @param type
 	 *            the class in which to search
@@ -50,7 +51,8 @@ public final class ReflectionUtils {
 
 	/**
 	 * Creates a Predicate that matches methods that contain all the passed
-	 * annotations.
+	 * annotations. If the passed list of annotations is empty, all methods will
+	 * be returned.
 	 * 
 	 * @param annotations
 	 *            the list of annotations to match
