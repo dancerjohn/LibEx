@@ -1,5 +1,6 @@
 package org.libex.hamcrest;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 import javax.annotation.Nullable;
@@ -83,6 +84,7 @@ public class IsOptional<T> extends TypeSafeMatcher<Optional<T>> {
 	 */
 	@Factory
 	public static <T> IsOptional<T> presentContaining(T value) {
+		checkNotNull(value);
 		return new IsOptional<T>(true, equalTo(value));
 	}
 

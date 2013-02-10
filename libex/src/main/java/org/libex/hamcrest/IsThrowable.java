@@ -17,30 +17,56 @@ import com.google.common.base.Optional;
 @ThreadSafe
 public class IsThrowable<T extends Throwable> extends BaseMatcher<Object> {
 
+	/**
+	 * Creates a {@link Matcher} of {@link Throwable} instances that matches
+	 * instances of the specified type
+	 * 
+	 * @param type
+	 *            the exception type to check for
+	 * @return a new {@link Matcher}
+	 */
 	public static <T extends Throwable> IsThrowable<T> isThrowableOfType(
 			Class<T> type) {
 		return new IsThrowable<T>(Optional.of(type), Optional.<String> absent());
 	}
 
-	public static IsThrowable<Throwable> isThrowableWithMessage(String message) {
+	/**
+	 * Creates a {@link Matcher} of {@link Throwable} instances that matches
+	 * instances whose message contains the passed string
+	 * 
+	 * @param substring
+	 *            the string for which to check in throwable
+	 * @return a new {@link Matcher}
+	 */
+	public static IsThrowable<Throwable> isThrowableWithMessage(String substring) {
 		return new IsThrowable<Throwable>(Optional.<Class<Throwable>> absent(),
-				Optional.of(message));
+				Optional.of(substring));
 	}
 
+	/**
+	 * Creates a {@link Matcher} of {@link Throwable} instances that matches
+	 * instances of the specified type whose message contains the passed string
+	 * 
+	 * @param type
+	 *            the exception type to check for
+	 * @param substring
+	 *            the string for which to check in throwable
+	 * @return a new {@link Matcher}
+	 */
 	public static <T extends Throwable> IsThrowable<T> isThrowable(
-			Class<T> type, String message) {
-		return new IsThrowable<T>(Optional.of(type), Optional.of(message));
+			Class<T> type, String substring) {
+		return new IsThrowable<T>(Optional.of(type), Optional.of(substring));
 	}
 
 	@Nullable
 	private final Matcher<Object> type;
 	@Nullable
-	private final Matcher<String> message;
+	private final Matcher<String> substring;
 
-	private IsThrowable(Optional<Class<T>> type, Optional<String> message) {
+	private IsThrowable(Optional<Class<T>> type, Optional<String> substring) {
 		super();
 		this.type = type.isPresent() ? instanceOf(type.get()) : null;
-		this.message = message.isPresent() ? Matchers.containsString(message
+		this.substring = substring.isPresent() ? Matchers.containsString(substring
 				.get()) : null;
 	}
 
@@ -52,11 +78,12 @@ public class IsThrowable<T extends Throwable> extends BaseMatcher<Object> {
 			description.appendDescriptionOf(type);
 		}
 
-		if (message != null) {
-			if (type != null)
+		if (substring != null) {
+			if (type != null) {
 				description.appendText("and");
+			}
 			description.appendText(" with message matching ");
-			description.appendDescriptionOf(message);
+			description.appendDescriptionOf(substring);
 		}
 	}
 
@@ -69,11 +96,12 @@ public class IsThrowable<T extends Throwable> extends BaseMatcher<Object> {
 				result &= type.matches(t);
 			}
 
-			if (message != null) {
-				if (arg0 == null)
+			if (substring != null) {
+				if (arg0 == null) {
 					result = false;
-				else
-					result &= message.matches(t.getMessage());
+				} else {
+					result &= substring.matches(t.getMessage());
+				}
 			}
 		}
 
