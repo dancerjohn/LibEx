@@ -19,6 +19,9 @@ import com.google.common.base.Joiner;
  * Abstract base class for Test Supplier classes. Handles checking for
  * {@link ReturnAsList}.
  * 
+ * For an example about how this could be used, see
+ * {@code org.libex.test.theories.suppliers} in Examples.
+ * 
  * @author John Butler
  * 
  */
