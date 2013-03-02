@@ -1,6 +1,6 @@
 package org.libex.base;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -83,6 +83,49 @@ public final class StringsEx {
 				return String.format(format, arg0);
 			}
 		};
+	}
+
+	@Nonnull
+	public static Function<String, String> replaceAll(final String regex, final String replacement) {
+		checkNotNull(regex);
+		checkNotNull(replacement);
+
+		return new Function<String, String>() {
+
+			@Override
+			@Nonnull
+			public String apply(@Nonnull String input) {
+				return input.replaceAll(regex, replacement);
+			}
+		};
+	}
+
+	private static final Function<String, String> toLowerCase = new Function<String, String>() {
+
+		@Override
+		@Nullable
+		public String apply(@Nullable String input) {
+			return (input == null) ? null : input.toLowerCase();
+		}
+	};
+
+	@Nonnull
+	public static Function<String, String> toLowerCase() {
+		return toLowerCase;
+	}
+
+	private static final Function<String, String> toUpperCase = new Function<String, String>() {
+
+		@Override
+		@Nullable
+		public String apply(@Nullable String input) {
+			return (input == null) ? null : input.toUpperCase();
+		}
+	};
+
+	@Nonnull
+	public static Function<String, String> toUpperCase() {
+		return toUpperCase;
 	}
 
 	private StringsEx() {
