@@ -46,7 +46,7 @@ public class IsString {
 
 		@Override
 		public void describeTo(Description arg0) {
-			arg0.appendText("regular expression: " + regularExpression);
+			arg0.appendText("string matching regular expression: \"" + regularExpression + "\"");
 		}
 
 		@Override

@@ -128,6 +128,11 @@ public final class StringsEx {
 		return toUpperCase;
 	}
 
+	@Nullable
+	public static String trim(@Nullable String s) {
+		return (s == null) ? null : s.trim();
+	}
+
 	private StringsEx() {
 	}
 }
