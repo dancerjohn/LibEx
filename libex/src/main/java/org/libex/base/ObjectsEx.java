@@ -8,6 +8,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.ThreadSafe;
 
 import com.google.common.base.Function;
+import com.google.common.base.Objects;
+import com.google.common.base.Predicate;
 
 /**
  * Utility method on Object instances.
@@ -91,6 +93,31 @@ public final class ObjectsEx {
 		checkNotNull(defaultValue);
 
 		return (object == null) ? defaultValue : object.toString();
+	}
+
+	/**
+	 * Returns the first argument if it is not null otherwise returns the second
+	 * argument. This method is different from {@link Objects.firstNonnull()} in
+	 * that it may return null if both arguments are null.
+	 * 
+	 * @param first
+	 * @param second
+	 * @return the first argument if it is not null otherwise returns the second
+	 *         argument
+	 */
+	@Nullable
+	public static <T> T firstNotNull(@Nullable T first, @Nullable T second) {
+		return (first != null) ? first : second;
+	}
+
+	public static <T> Predicate<T> equalsPredicate(@Nullable final T value) {
+		return new Predicate<T>() {
+
+			@Override
+			public boolean apply(@Nullable T input) {
+				return Objects.equal(value, input);
+			}
+		};
 	}
 
 	private ObjectsEx() {

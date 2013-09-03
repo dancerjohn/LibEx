@@ -9,6 +9,7 @@ import javax.annotation.concurrent.ThreadSafe;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Supplier;
 
 /**
  * Utility methods for {@link Optional} instances.
@@ -79,6 +80,20 @@ public final class OptionalsEx {
 			@Nonnull
 			public U apply(@Nonnull Optional<U> optional) {
 				return optional.or(defaultValue);
+			}
+		};
+	}
+
+	@Nonnull
+	public static <U> Function<Optional<U>, U> toValueOr(final Supplier<U> supplier) {
+		checkNotNull(supplier);
+
+		return new Function<Optional<U>, U>() {
+
+			@Override
+			@Nonnull
+			public U apply(@Nonnull Optional<U> optional) {
+				return optional.or(supplier);
 			}
 		};
 	}

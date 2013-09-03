@@ -19,12 +19,14 @@ import java.util.Date;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import org.joda.time.DateTime;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+import org.libex.concurrent.DateSupplier;
 
 /**
- * Used to control the {@link DateSupplier}  in a unit test environment.
+ * Used to control the {@link DateSupplier} in a unit test environment.
  * 
  * @author John Butler
  * 
@@ -35,6 +37,7 @@ public class DateController implements TestRule {
 	private final DateSupplierOverrider timeProvider = DateSupplierOverrider
 			.getInstance();
 
+	@Override
 	public Statement apply(final Statement statement, Description arg1) {
 		return new Statement() {
 
@@ -51,9 +54,21 @@ public class DateController implements TestRule {
 
 	/**
 	 * Sets the time returned by {@link DateSupplier} to the passed {@code date}
-	 * @param date the {@code Date} to which to set the current time
+	 * 
+	 * @param date
+	 *            the {@code Date} to which to set the current time
 	 */
 	public void setCurrentTime(Date date) {
+		timeProvider.setCurrentTime(date);
+	}
+
+	/**
+	 * Sets the time returned by {@link DateSupplier} to the passed {@code date}
+	 * 
+	 * @param date
+	 *            the {@code DateTime} to which to set the current time
+	 */
+	public void setCurrentTime(DateTime date) {
 		timeProvider.setCurrentTime(date);
 	}
 
@@ -65,7 +80,8 @@ public class DateController implements TestRule {
 	}
 
 	/**
-	 * Resets the {@link DateSupplier} to the default behavior (returning the current time)
+	 * Resets the {@link DateSupplier} to the default behavior (returning the
+	 * current time)
 	 */
 	public void reset() {
 		timeProvider.reset();

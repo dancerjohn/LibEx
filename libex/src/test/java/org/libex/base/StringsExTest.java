@@ -1,9 +1,9 @@
 package org.libex.base;
 
-import static com.google.common.collect.Iterables.filter;
-import static com.google.common.collect.Lists.newArrayList;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static com.google.common.collect.Iterables.*;
+import static com.google.common.collect.Lists.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
 
 import java.util.Date;
 import java.util.List;
@@ -151,6 +151,22 @@ public class StringsExTest {
 			for (String value : valuesToTest) {
 				assertThat(formatter.apply(value), equalTo(String.format(format, value)));
 			}
+		}
+	}
+
+	@RunWith(Theories.class)
+	public static class TrimTests extends TestBase {
+
+		@DataPoints
+		public static String[] validFormats = { "", null, " ", " b lah " };
+
+		@Theory
+		public void testTrim(String format) {
+			// test
+			String result = StringsEx.trim(format);
+
+			// verify
+			assertThat(result, equalTo((format == null) ? null : format.trim()));
 		}
 	}
 }

@@ -16,6 +16,8 @@ import org.libex.concurrent.profile.Profiling.Callback;
 import org.libex.concurrent.profile.Profiling.ProfileResult;
 import org.libex.test.TestBase;
 import org.libex.test.mockito.answer.DelayedAnswer;
+import org.libex.test.mockito.answer.InstanceAnswer;
+import org.libex.test.mockito.answer.ThrowingAnswer;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -41,8 +43,9 @@ public class ProfilerTest extends TestBase {
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
 		when(callable.call()).then(
-				DelayedAnswer.create(new TimeSpan(200, TimeUnit.MILLISECONDS))
-						.setValue(RETURN_VALUE));
+				DelayedAnswer.create(
+						InstanceAnswer.wrap(RETURN_VALUE),
+						new TimeSpan(200, TimeUnit.MILLISECONDS)));
 
 		profiler = new Profiler();
 		profiler.setObserver(callback);
@@ -89,8 +92,9 @@ public class ProfilerTest extends TestBase {
 		Exception e = new Exception();
 		reset(callable);
 		when(callable.call()).then(
-				DelayedAnswer.create(new TimeSpan(200, TimeUnit.MILLISECONDS))
-						.setThrowable(e));
+				DelayedAnswer.create(
+						ThrowingAnswer.wrap(e),
+						new TimeSpan(200, TimeUnit.MILLISECONDS)));
 
 		// expect
 		expectedException.expect(sameInstance(e));
@@ -130,8 +134,9 @@ public class ProfilerTest extends TestBase {
 		RuntimeException callbackEx = new RuntimeException();
 		reset(callable, callback);
 		when(callable.call()).then(
-				DelayedAnswer.create(new TimeSpan(200, TimeUnit.MILLISECONDS))
-						.setThrowable(callableEx));
+				DelayedAnswer.create(
+						ThrowingAnswer.wrap(callableEx),
+						new TimeSpan(200, TimeUnit.MILLISECONDS)));
 		doThrow(callbackEx).when(callback).processProfileEvent(Mockito.any(ProfileResult.class));
 
 		// expect

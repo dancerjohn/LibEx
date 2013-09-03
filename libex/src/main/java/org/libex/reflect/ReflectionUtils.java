@@ -1,10 +1,11 @@
 package org.libex.reflect;
 
-import static com.google.common.base.Preconditions.*;
-import static com.google.common.collect.Iterables.*;
-import static com.google.common.collect.Lists.*;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Iterables.filter;
+import static com.google.common.collect.Lists.newArrayList;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -92,6 +93,55 @@ public final class ReflectionUtils {
 				return method.getAnnotation(annotation) != null;
 			}
 		};
+	}
+
+	/**
+	 * Retrieves all fields (all access levels) from all classes up the class
+	 * hierarchy starting with {@code startClass} stopping with and not
+	 * including {@code exclusiveParent}.
+	 * 
+	 * Generally {@code Object.class} should be passed as
+	 * {@code exclusiveParent}.
+	 * 
+	 * @param startClass
+	 *            the class whose fields should be retrieved
+	 * @param exclusiveParent
+	 *            if not null, the base class of startClass whose fields should
+	 *            not be retrieved.
+	 * @return
+	 */
+	@Nonnull
+	public static Iterable<Field> getFieldsUpTo(@Nonnull Class<?> startClass, @Nullable Class<?> exclusiveParent) {
+		List<Field> currentClassFields = newArrayList(startClass.getDeclaredFields());
+		Class<?> parentClass = startClass.getSuperclass();
+
+		if (parentClass != null && (exclusiveParent == null || !(parentClass.equals(exclusiveParent)))) {
+			List<Field> parentClassFields = (List<Field>) getFieldsUpTo(parentClass, exclusiveParent);
+			currentClassFields.addAll(parentClassFields);
+		}
+
+		return currentClassFields;
+	}
+
+	@Nullable
+	public static Field getFieldInClassUpTo(String fieldName, @Nonnull Class<?> startClass, @Nullable Class<?> exclusiveParent) {
+		Field resultField = null;
+
+		try {
+			resultField = startClass.getDeclaredField(fieldName);
+		} catch (Exception e) {
+			// no op
+		}
+
+		if (resultField == null) {
+			Class<?> parentClass = startClass.getSuperclass();
+
+			if (parentClass != null && (exclusiveParent == null || !(parentClass.equals(exclusiveParent)))) {
+				resultField = getFieldInClassUpTo(fieldName, parentClass, exclusiveParent);
+			}
+		}
+
+		return resultField;
 	}
 
 	private ReflectionUtils() {

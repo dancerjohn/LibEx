@@ -22,6 +22,7 @@ import java.util.Date;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import org.joda.time.DateTime;
 import org.libex.concurrent.DateSupplier;
 
 /**
@@ -45,7 +46,7 @@ class DateSupplierOverrider extends DateSupplier {
 	}
 
 	@Nullable
-	private Date currentTime = null;
+	private DateTime currentTime = null;
 
 	/**
 	 * Constructor
@@ -55,14 +56,32 @@ class DateSupplierOverrider extends DateSupplier {
 
 	@Override
 	protected Date getOverridableDate() {
-		return firstNonNull(currentTime, super.getOverridableDate());
+		DateTime date = firstNonNull(currentTime, super.getOverridableDateTime());
+		return new Date(date.getMillis());
+	}
+
+	@Override
+	protected DateTime getOverridableDateTime() {
+		return firstNonNull(currentTime, super.getOverridableDateTime());
 	}
 
 	/**
 	 * Sets the time returned by {@link DateSupplier} to the passed {@code date}
-	 * @param date the {@code Date} to which to set the current time
+	 * 
+	 * @param date
+	 *            the {@code Date} to which to set the current time
 	 */
 	void setCurrentTime(Date date) {
+		currentTime = new DateTime(date.getTime());
+	}
+
+	/**
+	 * Sets the time returned by {@link DateSupplier} to the passed {@code date}
+	 * 
+	 * @param date
+	 *            the {@code DateTime} to which to set the current time
+	 */
+	void setCurrentTime(DateTime date) {
 		currentTime = date;
 	}
 
@@ -70,11 +89,12 @@ class DateSupplierOverrider extends DateSupplier {
 	 * Sets the time returned by {@link DateSupplier} to the current system time
 	 */
 	void setCurrentTimeToNow() {
-		currentTime = super.getOverridableDate();
+		currentTime = super.getOverridableDateTime();
 	}
 
 	/**
-	 * Resets the {@link DateSupplier} to the default behavior (returning the current time)
+	 * Resets the {@link DateSupplier} to the default behavior (returning the
+	 * current time)
 	 */
 	void reset() {
 		currentTime = null;

@@ -21,6 +21,11 @@ import org.libex.test.theories.suppliers.TestOn.TestOnSupplier;
  * {@code @Thoery public void test(@TestOn(ints= 2,3,4} int value1,
  * 
  * @TestOn(booleans={true, false} boolean bool)}
+ *                         <p/>
+ *                         The following example will return "blah" and
+ *                         {@code null}: {@code @Thoery public void
+ *                         test(@TestOn(strings= "blah", TestOn.NULL} boolean
+ *                         bool)}
  * 
  * @author John Butler
  * 
@@ -29,6 +34,8 @@ import org.libex.test.theories.suppliers.TestOn.TestOnSupplier;
 @ParametersSuppliedBy(TestOnSupplier.class)
 @Target(ElementType.PARAMETER)
 public @interface TestOn {
+
+	public static final String NULL = "null";
 
 	int[] ints() default {};
 
@@ -44,6 +51,10 @@ public @interface TestOn {
 
 	boolean[] booleans() default {};
 
+	/**
+	 * A value of {@code "null"} or {@link NULL} will result in a {@code null}
+	 * value being returned
+	 */
 	String[] strings() default {};
 
 	public static class TestOnSupplier extends ParameterSupplier {
@@ -81,7 +92,7 @@ public @interface TestOn {
 							Boolean.toString(i), i));
 				}
 				for (String i : testOn.strings()) {
-					result.add(PotentialAssignment.forValue(i, ("null".equals(i)) ? null : i));
+					result.add(PotentialAssignment.forValue(i, ("null".equals(i) || NULL.equals(i)) ? null : i));
 				}
 			}
 

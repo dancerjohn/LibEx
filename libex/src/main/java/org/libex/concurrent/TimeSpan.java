@@ -8,6 +8,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
 
+import org.joda.time.Duration;
+
 import com.google.common.base.Objects;
 import com.google.common.primitives.Longs;
 
@@ -19,10 +21,13 @@ import com.google.common.primitives.Longs;
  * 
  * @author John Butler
  * 
+ * @deprecated Use Joda Duration
+ * @see Duration
  */
 @ParametersAreNonnullByDefault
 @ThreadSafe
 @Immutable
+@Deprecated
 public final class TimeSpan implements Comparable<TimeSpan> {
 
 	public static TimeSpan oneNanosecond() {

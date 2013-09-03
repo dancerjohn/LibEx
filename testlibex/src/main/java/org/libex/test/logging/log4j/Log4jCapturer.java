@@ -1,5 +1,6 @@
 package org.libex.test.logging.log4j;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Predicates.and;
 import static com.google.common.collect.Iterables.find;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -16,10 +17,12 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.spi.LoggingEvent;
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.StringDescription;
+import org.hamcrest.collection.IsIterableWithSize;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -182,11 +185,19 @@ public class Log4jCapturer implements TestRule {
 	public void assertThat(LogAssertion assertion) {
 
 		List<LoggingEvent> logs = appender.getLoggingEvents();
-		LoggingEvent event = find(logs, assertion.criteria(), null);
 
-		Matcher<Object> matcher = (assertion.logged) ? notNullValue()
-				: nullValue();
-		MatcherAssert.assertThat(assertion.toString(), event, matcher);
+		if (assertion.times <= 1) {
+			LoggingEvent event = find(logs, assertion.criteria(), null);
+
+			Matcher<Object> matcher = (assertion.logged) ? notNullValue()
+					: nullValue();
+			MatcherAssert.assertThat(assertion.toString(), event, matcher);
+		}
+		else {
+			Iterable<LoggingEvent> event = Iterables.filter(logs, assertion.criteria());
+			MatcherAssert.assertThat(assertion.toString(), event,
+					IsIterableWithSize.<LoggingEvent> iterableWithSize(assertion.times));
+		}
 	}
 
 	/**
@@ -202,26 +213,50 @@ public class Log4jCapturer implements TestRule {
 		}
 
 		private boolean logged = true;
+		private int times = 1;
 		private Matcher<? super Level> level = Matchers.anything();
 		private Matcher<? super String> message = Matchers.anything();
 		private Matcher<? super Throwable> exception = Matchers.anything();
 
 		/**
 		 * Sets the assertion to expect the message to be logged. This method
-		 * should be used in conjuctions with one of the other {@code withX}
+		 * should be used in conjunction with one of the other {@code withX}
 		 * methods. This method is mutually exclusive with
 		 * {@link #isNotLogged()}
 		 * 
 		 * @return this instance
 		 */
 		public LogAssertion isLogged() {
-			this.logged = true;
-			return this;
+			return isLogged(1);
+		}
+
+		/**
+		 * Sets the assertion to expect the message to be logged. This method
+		 * should be used in conjunction with one of the other {@code withX}
+		 * methods. This method is mutually exclusive with
+		 * {@link #isNotLogged()}
+		 * 
+		 * @param times
+		 *            the number of times to expect the message to be logged.
+		 *            Values 0 or greater are valid. If 0, will cause the
+		 *            expectation that the message was NOT logged
+		 * @return this instance
+		 */
+		public LogAssertion isLogged(int times) {
+			checkArgument(times >= 0);
+
+			if (times == 0) {
+				return isNotLogged();
+			} else {
+				this.logged = true;
+				this.times = times;
+				return this;
+			}
 		}
 
 		/**
 		 * Sets the assertion to expect the message to NOT be logged. This
-		 * method should be used in conjuctions with one of the other
+		 * method should be used in conjunction with one of the other
 		 * {@code withX} methods. This method is mutually exclusive with
 		 * {@link #isLogged()}
 		 * 
@@ -229,6 +264,7 @@ public class Log4jCapturer implements TestRule {
 		 */
 		public LogAssertion isNotLogged() {
 			this.logged = false;
+			this.times = 0;
 			return this;
 		}
 
@@ -292,8 +328,13 @@ public class Log4jCapturer implements TestRule {
 			return this;
 		}
 
+		public LogAssertion withException(Class<? extends Throwable> exception) {
+			withException(CoreMatchers.instanceOf(exception));
+			return this;
+		}
+
 		/**
-		 * Sets the assertion to expect the logging event to contain an
+		 * Sets the assertion to expect the logging event to c ontain an
 		 * exception that matches the passed {@code exception}. The use of this
 		 * method is sufficient to assert a message is logged. No other method
 		 * calls are required, other than the call to
@@ -323,6 +364,10 @@ public class Log4jCapturer implements TestRule {
 				description.appendText("Message logged");
 			} else {
 				description.appendText("No message logged");
+			}
+
+			if (times > 0) {
+				description.appendText(" " + times + " time(s) ");
 			}
 
 			if (notIsAnything(level)) {

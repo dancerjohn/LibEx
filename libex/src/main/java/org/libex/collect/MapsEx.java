@@ -1,16 +1,19 @@
 package org.libex.collect;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
+import static com.google.common.collect.Maps.*;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import com.google.common.base.Function;
 import com.google.common.base.Supplier;
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Utilities on Map instances.
@@ -21,6 +24,18 @@ import com.google.common.collect.Maps;
 @NotThreadSafe
 @ParametersAreNonnullByDefault
 public final class MapsEx {
+
+	public static <K, V> HashMap<K, V> newHashMapWith(Map.Entry<? extends K, ? extends V>... entries) {
+		HashMap<K, V> map = newHashMap();
+		return (HashMap<K, V>) putAll(map, entries);
+	}
+
+	public static <K, V> Map<K, V> putAll(Map<K, V> map, Map.Entry<? extends K, ? extends V>... entries) {
+		for (Entry<? extends K, ? extends V> entry : entries) {
+			map.put(entry.getKey(), entry.getValue());
+		}
+		return map;
+	}
 
 	/**
 	 * Gets the value associated with the passed key. If no value is associated
@@ -65,8 +80,10 @@ public final class MapsEx {
 	 * @return the created map
 	 * 
 	 * @see com.google.common.base.Functions#identity()
+	 * @throws IllegalArgumentException
+	 *             if multiple inputs produces the same key
 	 */
-	public static <T, K, V> Map<K, V> uniqueIndex(Iterable<T> input,
+	public static <T, K, V> ImmutableMap<K, V> uniqueIndex(Iterable<T> input,
 			Function<? super T, ? extends K> keyFunction,
 			Function<? super T, ? extends V> valueFunction) {
 		return uniqueIndex(input.iterator(), keyFunction, valueFunction);
@@ -85,20 +102,22 @@ public final class MapsEx {
 	 * @return the created map
 	 * 
 	 * @see com.google.common.base.Functions#identity()
+	 * @throws IllegalArgumentException
+	 *             if multiple inputs produces the same key
 	 */
-	public static <T, K, V> Map<K, V> uniqueIndex(Iterator<T> input,
+	public static <T, K, V> ImmutableMap<K, V> uniqueIndex(Iterator<T> input,
 			Function<? super T, ? extends K> keyFunction,
 			Function<? super T, ? extends V> valueFunction) {
 		checkNotNull(keyFunction);
 		checkNotNull(valueFunction);
 
-		Map<K, V> map = Maps.newHashMap();
+		ImmutableMap.Builder<K, V> map = ImmutableMap.builder();
 		while (input.hasNext()) {
 			T inputValue = input.next();
-			map.put(keyFunction.apply(inputValue),
-					valueFunction.apply(inputValue));
+			K key = keyFunction.apply(inputValue);
+			map.put(key, valueFunction.apply(inputValue));
 		}
-		return map;
+		return map.build();
 	}
 
 	/**
@@ -114,8 +133,10 @@ public final class MapsEx {
 	 * @return the created map
 	 * 
 	 * @see com.google.common.base.Functions#identity()
+	 * @throws IllegalArgumentException
+	 *             if multiple inputs produces the same key
 	 */
-	public static <T, K, V> Map<K, V> multipleIndex(Iterable<T> inputs,
+	public static <T, K, V> ImmutableMap<K, V> multipleIndex(Iterable<T> inputs,
 			Function<? super T, ? extends Iterable<? extends K>> keyFunction,
 			Function<? super T, ? extends V> valueFunction) {
 		return multipleIndex(inputs.iterator(), keyFunction, valueFunction);
@@ -134,14 +155,16 @@ public final class MapsEx {
 	 * @return the created map
 	 * 
 	 * @see com.google.common.base.Functions#identity()
+	 * @throws IllegalArgumentException
+	 *             if multiple inputs produces the same key
 	 */
-	public static <T, K, V> Map<K, V> multipleIndex(Iterator<T> inputs,
+	public static <T, K, V> ImmutableMap<K, V> multipleIndex(Iterator<T> inputs,
 			Function<? super T, ? extends Iterable<? extends K>> keyFunction,
 			Function<? super T, ? extends V> valueFunction) {
 		checkNotNull(keyFunction);
 		checkNotNull(valueFunction);
 
-		Map<K, V> map = Maps.newHashMap();
+		ImmutableMap.Builder<K, V> map = ImmutableMap.builder();
 		while (inputs.hasNext()) {
 			T input = inputs.next();
 			V value = valueFunction.apply(input);
@@ -150,7 +173,7 @@ public final class MapsEx {
 				map.put(key, value);
 			}
 		}
-		return map;
+		return map.build();
 	}
 
 	private MapsEx() {

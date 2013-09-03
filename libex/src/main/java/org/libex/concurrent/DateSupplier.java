@@ -22,6 +22,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import org.joda.time.DateTime;
+
 /**
  * Provides the current system {@code Date} in a test-overridable manner.
  * 
@@ -42,6 +44,13 @@ public class DateSupplier {
 	 */
 	public static Date getCurrentDate() {
 		return getInstance().getOverridableDate();
+	}
+
+	/**
+	 * @return the current {@link DateTime} produced via {@code new Date()}
+	 */
+	public static DateTime getCurrentDateTime() {
+		return getInstance().getOverridableDateTime();
 	}
 
 	/**
@@ -100,5 +109,15 @@ public class DateSupplier {
 	 */
 	protected Date getOverridableDate() {
 		return new Date();
+	}
+
+	/**
+	 * Method that should be overridden in a test environment to control the
+	 * date.
+	 * 
+	 * @return the current {@link DateTime}
+	 */
+	protected DateTime getOverridableDateTime() {
+		return new DateTime();
 	}
 }

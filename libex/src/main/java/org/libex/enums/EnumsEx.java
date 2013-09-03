@@ -8,7 +8,7 @@ import com.google.common.base.Function;
 
 @ThreadSafe
 @ParametersAreNonnullByDefault
-public class EnumsEx {
+public final class EnumsEx {
 
 	private static final Function<Enum<?>, String> toName = new Function<Enum<?>, String>() {
 
@@ -33,4 +33,6 @@ public class EnumsEx {
 		return toName;
 	}
 
+	private EnumsEx() {
+	}
 }
