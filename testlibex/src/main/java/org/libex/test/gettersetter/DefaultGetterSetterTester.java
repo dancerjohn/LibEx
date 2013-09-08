@@ -77,6 +77,31 @@ public class DefaultGetterSetterTester<T> {
 		T transform(@Nonnull ProcessingArguments<T> args);
 	}
 
+	public static interface GetterInvoker<T> {
+		@Nullable
+		T invokeGetter(@Nonnull ProcessingArguments<T> args) throws Exception;
+
+		Method findGetter(
+				Class<?> classUnderTest,
+				String fieldName,
+				Class<?> fieldType) throws AssertionError;
+	}
+
+	private static class DefaultGetterInvoker<T> implements GetterInvoker<T> {
+
+		@SuppressWarnings("unchecked")
+		@Override
+		@Nullable
+		public T invokeGetter(@Nonnull ProcessingArguments<T> args) throws Exception {
+			return (T) args.getter.invoke(args.instanceUnderTest, args.valueBeingSet);
+		}
+
+		@Override
+		public Method findGetter(Class<?> classUnderTest, String fieldName, Class<?> fieldType) throws AssertionError {
+			return DefaultGetterSetterTester.findGetter(classUnderTest, fieldName, fieldType);
+		}
+	}
+
 	@Nonnull
 	public static <T> Predicate<T> getNullableFilter(
 			Class<?> classUnderTest,
@@ -113,6 +138,9 @@ public class DefaultGetterSetterTester<T> {
 
 	@Nullable
 	private ExpectedValueSupplier<T> expectedValueSupplier = null;
+
+	@Nonnull
+	private GetterInvoker<T> getterInvoker = new DefaultGetterInvoker<T>();
 
 	@Nullable
 	private ErrorCollector errorCollector = null;
@@ -184,10 +212,14 @@ public class DefaultGetterSetterTester<T> {
 	}
 
 	@Nonnull
-	private Method findGetter() {
+	private Method findGetter() throws AssertionError {
 		Method getter = this.getter;
 		if (getter == null) {
-			return findGetter(classUnderTest, fieldName, fieldType);
+			if (getterInvoker != null) {
+				return getterInvoker.findGetter(classUnderTest, fieldName, fieldType);
+			} else {
+				return findGetter(classUnderTest, fieldName, fieldType);
+			}
 		}
 		return getter;
 	}
@@ -196,13 +228,13 @@ public class DefaultGetterSetterTester<T> {
 	public static Method findGetter(
 			Class<?> classUnderTest,
 			String fieldName,
-			Class<?> fieldType) {
+			Class<?> fieldType) throws AssertionError {
 		List<String> prefixes = newArrayList("", "get", "is");
 		return findFieldMethod(classUnderTest, fieldName, "getter", prefixes, fieldType);
 	}
 
 	@Nonnull
-	private Method findSetter() {
+	private Method findSetter() throws AssertionError {
 		if (setter == null) {
 			return findSetter(classUnderTest, fieldName, fieldType);
 		} else {
@@ -214,7 +246,7 @@ public class DefaultGetterSetterTester<T> {
 	public static Method findSetter(
 			Class<?> classUnderTest,
 			String fieldName,
-			Class<?> fieldType) {
+			Class<?> fieldType) throws AssertionError {
 		List<String> prefixes = newArrayList("", "set", "with");
 		return findFieldMethod(classUnderTest, fieldName, "setter", prefixes, null, fieldType);
 	}
@@ -226,7 +258,7 @@ public class DefaultGetterSetterTester<T> {
 			String methodType,
 			Iterable<String> prefixes,
 			Class<?> returnType,
-			Class<?>... types) {
+			Class<?>... types) throws AssertionError {
 		List<String> attempts = newArrayList();
 		String upperCaseName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
 
@@ -306,11 +338,11 @@ public class DefaultGetterSetterTester<T> {
 		}
 	}
 
-	private void checkValue(T input) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	private void checkValue(T input) throws Exception {
 		ProcessingArguments<T> args = new ProcessingArguments<T>(this, input);
 		preInvokeWith(args);
 
-		T preValue = invokeGetter();
+		T preValue = invokeGetter(args);
 		assertThat(String.format("values are equal before invoking setter with \"%s\"", input),
 				input, not(equalTo(preValue)));
 
@@ -320,13 +352,13 @@ public class DefaultGetterSetterTester<T> {
 					setterReturn, sameInstance(instanceUnderTest));
 		}
 
-		T postValue = invokeGetter();
+		T postValue = invokeGetter(args);
 		T expectedValue = getExpectedFrom(args);
 		assertThat(String.format("values are not equal after invoking setter with \"%s\"", input),
 				postValue, equalTo(expectedValue));
 	}
 
-	private void preInvokeWith(ProcessingArguments<T> input) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	private void preInvokeWith(ProcessingArguments<T> input) throws Exception {
 		if (preProcessor != null) {
 			preProcessor.preprocess(input);
 		} else {
@@ -334,9 +366,9 @@ public class DefaultGetterSetterTester<T> {
 		}
 	}
 
-	private void setToNonnullOnNull(ProcessingArguments<T> input) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	private void setToNonnullOnNull(ProcessingArguments<T> input) throws Exception {
 		if (input.valueBeingSet == null) {
-			T currentValue = invokeGetter();
+			T currentValue = invokeGetter(input);
 			if (currentValue == null) {
 				T firstNonNull = Iterables.get(
 						filter(valuesToTest, Predicates.notNull()), 0);
@@ -359,13 +391,20 @@ public class DefaultGetterSetterTester<T> {
 
 	@SuppressWarnings("unchecked")
 	@Nullable
-	private T invokeGetter() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		return (T) getter.invoke(instanceUnderTest);
+	private T invokeGetter(ProcessingArguments<T> input) throws Exception {
+		T result;
+		if (getterInvoker != null) {
+			result = getterInvoker.invokeGetter(input);
+		} else {
+			result = (T) getter.invoke(instanceUnderTest);
+		}
+		LOG.trace(String.format("Invoked getter \"%s\" with result \"%s\"", getter, result));
+		return result;
 	}
 
 	@Nullable
 	private Object invokeSetter(T value) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		LOG.trace(String.format("Invoking setter %s with \"%s\"", setter, value));
+		LOG.trace(String.format("Invoking setter \"%s\" with \"%s\"", setter, value));
 		return setter.invoke(instanceUnderTest, value);
 	}
 

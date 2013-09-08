@@ -1,8 +1,12 @@
 package org.libex.base;
 
+<<<<<<< HEAD
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.regex.Pattern;
+=======
+import static com.google.common.base.Preconditions.*;
+>>>>>>> 00256a47671d17fb29c8f580b0470e18d192d286
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -18,6 +22,21 @@ import com.google.common.base.Strings;
 @ThreadSafe
 public final class StringsEx {
 
+<<<<<<< HEAD
+=======
+	private static final Predicate<String> isNullOrEmpty = new Predicate<String>() {
+
+		@Override
+		public boolean apply(@Nullable String input) {
+			return Strings.isNullOrEmpty(input);
+		}
+	};
+
+	public static Predicate<String> isNullOrEmpty() {
+		return isNullOrEmpty;
+	}
+
+>>>>>>> 00256a47671d17fb29c8f580b0470e18d192d286
 	/**
 	 * Creates a Function that formats the object passed to the Function using
 	 * the passed format. This method uses {@code String.format(format, input)}
@@ -75,6 +94,7 @@ public final class StringsEx {
 		};
 	}
 
+<<<<<<< HEAD
 	private static final Predicate<String> isNullOrEmpty = new Predicate<String>() {
 
 		@Override
@@ -87,6 +107,8 @@ public final class StringsEx {
 		return isNullOrEmpty;
 	}
 
+=======
+>>>>>>> 00256a47671d17fb29c8f580b0470e18d192d286
 	@Nonnull
 	public static Function<String, String> replaceAll(final String regex, final String replacement) {
 		checkNotNull(regex);
@@ -102,6 +124,7 @@ public final class StringsEx {
 		};
 	}
 
+<<<<<<< HEAD
 	// Commented out because is ObjectsEx
 	// public static Predicate<String> equals(@Nullable final String value) {
 	// return new Predicate<String>() {
@@ -178,6 +201,8 @@ public final class StringsEx {
 	// return nullableToString;
 	// }
 
+=======
+>>>>>>> 00256a47671d17fb29c8f580b0470e18d192d286
 	private static final Function<String, String> toLowerCase = new Function<String, String>() {
 
 		@Override
@@ -211,6 +236,7 @@ public final class StringsEx {
 		return (s == null) ? null : s.trim();
 	}
 
+<<<<<<< HEAD
 	private static final Function<String, String> toTrimmed = new Function<String, String>() {
 
 		@Override
@@ -225,6 +251,8 @@ public final class StringsEx {
 		return toTrimmed;
 	}
 
+=======
+>>>>>>> 00256a47671d17fb29c8f580b0470e18d192d286
 	private StringsEx() {
 	}
 }

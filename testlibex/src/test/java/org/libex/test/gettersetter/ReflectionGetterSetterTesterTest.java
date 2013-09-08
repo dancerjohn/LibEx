@@ -14,4 +14,9 @@ public class ReflectionGetterSetterTesterTest extends TestBase {
 	public void test2() {
 		ReflectionGetterSetterTester.testAllGetterSetters(new TestClassA(), errorCollector);
 	}
+
+	@Test
+	public void testBuilder() {
+		ReflectionGetterSetterTester.testAllGetterSetters(new TestClassA(), errorCollector);
+	}
 }

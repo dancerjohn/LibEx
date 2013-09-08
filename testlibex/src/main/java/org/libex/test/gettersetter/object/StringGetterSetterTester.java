@@ -1,4 +1,4 @@
-package org.libex.test.gettersetter;
+package org.libex.test.gettersetter.object;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.ThreadSafe;
+
+import org.libex.test.gettersetter.BaseGetterSetterTester;
 
 @ParametersAreNonnullByDefault
 @ThreadSafe

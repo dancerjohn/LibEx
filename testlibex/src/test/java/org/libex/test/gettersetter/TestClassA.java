@@ -1,5 +1,7 @@
 package org.libex.test.gettersetter;
 
+import java.util.Date;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -9,6 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import org.joda.time.DateTime;
+import org.w3c.dom.Document;
 
 @ParametersAreNonnullByDefault
 @ThreadSafe
@@ -49,5 +52,10 @@ public class TestClassA {
 	private String stringValue;
 
 	private Object objectValue = null;
+	@Nullable
+	private Date dateValue = null;
+	@Nullable
 	private DateTime dateTimeValue = null;
+
+	private Document document = null;
 }

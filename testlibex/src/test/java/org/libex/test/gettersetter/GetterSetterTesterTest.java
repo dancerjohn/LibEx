@@ -11,14 +11,12 @@ import org.junit.Test;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
-import org.libex.base.StringsEx;
 import org.libex.test.TestBase;
 import org.libex.test.gettersetter.DefaultGetterSetterTester.ExpectedValueSupplier;
 import org.libex.test.gettersetter.DefaultGetterSetterTester.ProcessingArguments;
+import org.libex.test.gettersetter.object.StringGetterSetterTester;
 import org.libex.test.gettersetter.old.IntPrimitiveGetterSetterTester;
-import org.libex.test.gettersetter.primitive.IntegerGetterSetterTester;
 import org.libex.test.theories.suppliers.TestOn;
-import org.w3c.dom.Document;
 
 @RunWith(Theories.class)
 public class GetterSetterTesterTest extends TestBase {
@@ -52,29 +50,47 @@ public class GetterSetterTesterTest extends TestBase {
 		IntPrimitiveGetterSetterTester.testIntGetterSetter(TestClass1.class, "intValue");
 	}
 
-	@Test
-	public void testInstance() {
-		IntPrimitiveGetterSetterTester.testIntGetterSetter(new TestClass1(), "intValue");
-		IntegerGetterSetterTester.testIntegerGetterSetter(new TestClass1(), "integerValue");
-		IntegerGetterSetterTester.testIntegerGetterSetter(new TestClass1(), "nullableIntegerValue");
-		StringGetterSetterTester.testStringGetterSetter(new TestClass1(), "stringValue");
-		ObjectGetterSetterTester.testObjectGetterSetter(new TestClass1(), "document", Document.class);
-	}
+	// @Test
+	// public void testInstance() {
+	// IntPrimitiveGetterSetterTester.testIntGetterSetter(new TestClass1(),
+	// "intValue");
+	// IntegerGetterSetterTester.testIntegerGetterSetter(new TestClass1(),
+	// "integerValue");
+	// IntegerGetterSetterTester.testIntegerGetterSetter(new TestClass1(),
+	// "nullableIntegerValue");
+	// StringGetterSetterTester.testStringGetterSetter(new TestClass1(),
+	// "stringValue");
+	// ObjectGetterSetterTester.testObjectGetterSetter(new TestClass1(),
+	// "document", Document.class);
+	// }
+	//
+	// @Test
+	// public void testGenericInstance() {
+	// GetterSetterTester.testGetterSetter(new TestClass1(), "intValue",
+	// int.class);
+	// GetterSetterTester.testGetterSetter(new TestClass1(), "integerValue",
+	// Integer.class);
+	// GetterSetterTester.testGetterSetter(new TestClass1(),
+	// "nullableIntegerValue", Integer.class);
+	// GetterSetterTester.testGetterSetter(new TestClass1(), "stringValue",
+	// String.class);
+	// GetterSetterTester.testGetterSetter(new TestClass1(), "document",
+	// Document.class);
+	// }
+	//
+	// @Test
+	// public void testTrimmedInstance() {
+	// TransformingExpectedValueSupplier.transformExpectedValues(
+	// StringGetterSetterTester.createTester(TestClass1.class, new TestClass1(),
+	// "trimmedStringValue"),
+	// StringsEx.toTrimmed())
+	// .testGetterSetter();
+	// }
 
 	@Test
-	public void testGenericInstance() {
-		GetterSetterTester.testGetterSetter(new TestClass1(), "intValue", int.class);
-		GetterSetterTester.testGetterSetter(new TestClass1(), "integerValue", Integer.class);
-		GetterSetterTester.testGetterSetter(new TestClass1(), "nullableIntegerValue", Integer.class);
-		GetterSetterTester.testGetterSetter(new TestClass1(), "stringValue", String.class);
-		GetterSetterTester.testGetterSetter(new TestClass1(), "document", Document.class);
-	}
-
-	@Test
-	public void testTrimmedInstance() {
-		TransformingExpectedValueSupplier.transformExpectedValues(
-				StringGetterSetterTester.createTester(TestClass1.class, new TestClass1(), "trimmedStringValue"),
-				StringsEx.toTrimmed())
+	public void testBuilderInstance() {
+		BuilderGetterInvoker.builderTester(
+				new StringGetterSetterTester().createTester(BuilderExampleA.BuilderExampleABuilder.class, BuilderExampleA.builder(), "stringValue"))
 				.testGetterSetter();
 	}
 

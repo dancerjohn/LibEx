@@ -9,7 +9,13 @@
 		<dependency>
 			<groupId>org.jjbutler.libex</groupId>
 			<artifactId>libex</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.2-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jjbutler.libex</groupId>
+			<artifactId>libex-test</artifactId>
+			<version>0.0.2-SNAPSHOT</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>

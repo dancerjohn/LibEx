@@ -54,7 +54,7 @@ public class ReflectionGetterSetterTester {
 	private final ErrorCollector errorCollector;
 	private final Set<String> excludes;
 
-	private ReflectionGetterSetterTester(
+	protected ReflectionGetterSetterTester(
 			Class<?> classUnderTest,
 			Class<?> exclusiveSuperClass,
 			@Nullable Object instanceUnderTest,
@@ -67,22 +67,21 @@ public class ReflectionGetterSetterTester {
 		this.excludes = Sets.newHashSet(excludes);
 	}
 
-	private void testAllGettersAndSetters() {
+	protected void testAllGettersAndSetters() {
 		Iterable<Field> fields = ReflectionUtils.getFieldsUpTo(classUnderTest, exclusiveSuperClass);
 		for (Field field : fields) {
 			testField(field);
 		}
 	}
 
-	private void testField(Field field) {
+	protected void testField(Field field) {
 		if (!Modifier.isFinal(field.getModifiers())) {
 
 			String fieldName = field.getName();
 			if (!excludes.contains(fieldName)) {
 				LOG.debug("testing field " + field);
-				Class<?> fieldType = field.getType();
-				DefaultGetterSetterTester<?> tester = GetterSetterTester.createTester(classUnderTest, instanceUnderTest, fieldName, fieldType);
-				tester.setErrorCollector(errorCollector);
+				DefaultGetterSetterTester<?> tester = GetterSetterTester.createTester(classUnderTest, instanceUnderTest, fieldName, field.getType());
+				tester = setupTester(tester);
 				tester.testGetterSetter();
 			} else {
 				LOG.debug("skipping excluded field " + field);
@@ -92,5 +91,9 @@ public class ReflectionGetterSetterTester {
 		}
 	}
 
-	// TODO base class, logging, multiple Methods found
+	protected DefaultGetterSetterTester<?> setupTester(DefaultGetterSetterTester<?> tester) {
+		return tester.setErrorCollector(errorCollector);
+	}
+
+	// TODO test all error conditions, multiple Methods found, Builder pattern
 }
