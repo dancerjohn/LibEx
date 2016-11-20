@@ -12,32 +12,36 @@ import org.mockito.stubbing.Answer;
  * A {@link WrappedAnswer} that if closed will block the mock invocation until
  * opened.
  * 
- * @author John Butler
- * 
+ * @param <T>
+ *            type to be returned by the Answer
  */
 @ParametersAreNonnullByDefault
 @ThreadSafe
 public class BarrierredAnswer<T> extends WrappedAnswer<T> {
 
-	/**
-	 * @return a new open {@link BarrierredAnswer}
-	 */
+	    /**
+     * @return a new open {@link BarrierredAnswer}
+     * @param <T>
+     *            type to be returned by the Answer
+     */
 	public static <T> BarrierredAnswer<T> create() {
 		return new BarrierredAnswer<T>(null);
 	}
 
-	/**
-	 * @param delegate
-	 *            the Answer to wrap
-	 * @return a new open {@link BarrierredAnswer} wrapping the passed delegate
-	 */
-	public static <T> BarrierredAnswer<T> create(@Nullable Answer<T> delegate) {
+	    /**
+     * @param delegate
+     *            the Answer to wrap
+     * @return a new open {@link BarrierredAnswer} wrapping the passed delegate
+     * @param <T>
+     *            type to be returned by the Answer
+     */
+	public static <T> BarrierredAnswer<T> create(@Nullable final Answer<T> delegate) {
 		return new BarrierredAnswer<T>(delegate);
 	}
 
 	private final SimpleBarrier barrier = new SimpleBarrier();
 
-	private BarrierredAnswer(@Nullable Answer<T> delegate) {
+	private BarrierredAnswer(@Nullable final Answer<T> delegate) {
 		super(delegate);
 		barrier.open();
 	}
@@ -60,7 +64,7 @@ public class BarrierredAnswer<T> extends WrappedAnswer<T> {
 	}
 
 	@Override
-	protected void preProcess(InvocationOnMock invocation) throws Throwable {
+	protected void preProcess(final InvocationOnMock invocation) throws Throwable {
 		barrier.await();
 		super.preProcess(invocation);
 	}

@@ -31,7 +31,7 @@ public class TimeSpanCounter {
 		synchronized (lock) {
 			removeExpiredEvents();
 
-			delayQueue.add(createDelay(timeSpan));
+			delayQueue.add(createDelayUsingDateSupplier(timeSpan));
 		}
 	}
 

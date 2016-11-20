@@ -1,139 +1,46 @@
 package org.libex.base;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.testing.NullPointerTester.Visibility;
+import com.google.common.base.Optional;
 
 public class FinalizableSettableOnceTest extends SettableOnceTest {
 
-	private FinalizableSettableOnce<String> settable;
-
-	@Override
-	protected FinalizableSettableOnce<String> createSettableWith(String name, String message) {
-		if (name != null) {
-			return FinalizableSettableOnce.withName(name);
-		} else if (message != null) {
-			return FinalizableSettableOnce.withMessage(message);
-		} else {
-			return FinalizableSettableOnce.empty();
-		}
+	private FinalizableSettableOnce<String> fso;
+	
+	protected SettableOnce<String> create(){
+		return fso = new FinalizableSettableOnce<String>();
 	}
-
-	@Override
-	@Before
-	public void setUp() throws Exception {
-		super.setUp();
-		settable = createSettableWith(null, null);
-	}
-
+	
 	@Test
-	public void testNullsFinalize() {
-		nullPointerTester.testConstructors(FinalizableSettableOnce.class, Visibility.PROTECTED);
-		nullPointerTester.testInstanceMethods(settable, Visibility.PROTECTED);
+	public void SubclassParameterizedConstructorTest(){
+		fso = new FinalizableSettableOnce<String>(input1);
+		
+		assertNull(fso.get());
+		assertEquals(fso.getOptional(), Optional.absent());
+		assertEquals(fso.getMessage(), "Field " + input1 + " cannot be set more than once");
 	}
-
+	
 	@Test
-	public void testSet_emptyFinalizedNoMessage() {
-		// setup
-		settable.makeImmutable();
-
-		// expect
-		expectedException.expect(IllegalStateException.class);
-		expectedException.expectMessage("Field has been finalized");
-
-		// test
-		settable.set(VALUE);
+	public void finalizeThenSet(){
+		fso.finalize();
+		
+		thrown.expect(IllegalStateException.class);
+		fso.set(input1);
 	}
-
+	
 	@Test
-	public void testSet_emptyFinalizedWithName() {
-		// setup
-		settable = createSettableWith("MyName", null);
-		settable.makeImmutable();
-
-		// expect
-		expectedException.expect(IllegalStateException.class);
-		expectedException.expectMessage("Field MyName has been finalized");
-
-		// test
-		settable.set(VALUE);
+	public void finalizeThenSetIfAbsent(){
+		fso.finalize();
+		
+		fso.setIfAbsent(input1);
+		
+		assertNull(fso.get());
+		assertEquals(fso.getOptional(), Optional.absent());
+		assertTrue(fso.getMessage().contains(" has been finalized"));
 	}
-
-	@Test
-	public void testSet_emptyFinalizedWithMessage() {
-		// setup
-		final String message = "this is some random message";
-		settable = createSettableWith(null, message);
-		settable.makeImmutable();
-
-		// expect
-		expectedException.expect(IllegalStateException.class);
-		expectedException.expectMessage(message);
-
-		// test
-		settable.set(VALUE);
-	}
-
-	@Test
-	public void testSet_notEmptyFinalizedNoMessage() {
-		// setup
-		settable.set(VALUE);
-		settable.makeImmutable();
-
-		// expect
-		expectedException.expect(IllegalStateException.class);
-		expectedException.expectMessage("Field has been finalized");
-
-		// test
-		settable.set(VALUE);
-	}
-
-	@Test
-	public void testSet_notEmptyFinalizedWithName() {
-		// setup
-		settable = createSettableWith("MyName", null);
-		settable.set(VALUE);
-		settable.makeImmutable();
-
-		// expect
-		expectedException.expect(IllegalStateException.class);
-		expectedException.expectMessage("Field MyName has been finalized");
-
-		// test
-		settable.set(VALUE);
-	}
-
-	@Test
-	public void testSet_notEmptyFinalizedWithMessage() {
-		// setup
-		final String message = "this is some random message";
-		settable = createSettableWith(null, message);
-		settable.set(VALUE);
-		settable.makeImmutable();
-
-		// expect
-		expectedException.expect(IllegalStateException.class);
-		expectedException.expectMessage(message);
-
-		// test
-		settable.set(VALUE);
-	}
-
-	@Test
-	public void testSetIfAbsent_finalized() {
-		// setup
-		settable.set(VALUE);
-		settable.makeImmutable();
-
-		// test
-		settable.setIfAbsent("something else");
-
-		// verify
-		assertThat(settable.get(), equalTo(VALUE));
-	}
-
 }

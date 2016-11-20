@@ -9,7 +9,6 @@ import javax.annotation.concurrent.ThreadSafe;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.base.Supplier;
 
 /**
  * Utility methods for {@link Optional} instances.
@@ -21,55 +20,64 @@ import com.google.common.base.Supplier;
 @ParametersAreNonnullByDefault
 public final class OptionalsEx {
 
-	/**
-	 * @return a Function that wraps objects in {@link Optional} using
-	 *         {@link Optional#fromNullable(Object)}
-	 * 
-	 * @see Optional#fromNullable(Object)
-	 */
+	    /**
+     * @return a Function that wraps objects in {@link Optional} using {@link Optional#fromNullable(Object)}
+     * 
+     * @see Optional#fromNullable(Object)
+     * 
+     * @param <U>
+     *            type of the Optional to accept and value to return
+     */
 	@Nonnull
 	public static <U> Function<U, Optional<U>> fromNullable() {
 		return new Function<U, Optional<U>>() {
 
 			@Override
 			@Nonnull
-			public Optional<U> apply(@Nullable U arg0) {
+			public Optional<U> apply(@Nullable final U arg0) {
 				return Optional.fromNullable(arg0);
 			}
 		};
 	}
 
-	/**
-	 * @return a Function that returns the value wrapped by an {@link Optional}
-	 *         or null if the Optional is Absent.
-	 * 
-	 * @see Optional#orNull()
-	 */
+	    /**
+     * @return a Function that returns the value wrapped by an {@link Optional} or null if the Optional is Absent.
+     * 
+     * @see Optional#orNull()
+     * 
+     * @param <U>
+     *            type of the Optional to accept and value to return
+     */
 	@Nonnull
-	public static <U> Function<Optional<? extends U>, U> toValueOrNull() {
-		return new Function<Optional<? extends U>, U>() {
+    public static <U> Function<Optional<U>, U> toValueOrNull()
+    {
+        return new Function<Optional<U>, U>() {
 
 			@Override
 			@Nullable
-			public U apply(@Nonnull Optional<? extends U> optional) {
+            public U apply(
+                    @Nonnull final Optional<U> optional)
+            {
 				return optional.orNull();
 			}
 		};
 	}
 
-	/**
-	 * Creates a Function that returns the value wrapped by an {@link Optional}
-	 * or {@code defaultValue} if the Optional is Absent.
-	 * 
-	 * @param defaultValue
-	 *            the value that the function should return if passed an Absent
-	 * @return a Function that returns the value wrapped by an {@link Optional}
-	 *         or {@code defaultValue} if the Optional is Absent.
-	 * 
-	 * @throws NullPointerException
-	 *             if {@code defaultValue} is null, instead use
-	 *             {@link #toValueOrNull()}
-	 */
+	    /**
+     * Creates a Function that returns the value wrapped by an {@link Optional} or {@code defaultValue} if the Optional
+     * is Absent.
+     * 
+     * @param defaultValue
+     *            the value that the function should return if passed an Absent
+     * @return a Function that returns the value wrapped by an {@link Optional} or {@code defaultValue} if the Optional
+     *         is Absent.
+     * 
+     * @throws NullPointerException
+     *             if {@code defaultValue} is null, instead use {@link #toValueOrNull()}
+     * 
+     * @param <U>
+     *            type of the Optional to accept and value to return
+     */
 	@Nonnull
 	public static <U> Function<Optional<U>, U> toValueOr(final U defaultValue) {
 		checkNotNull(defaultValue);
@@ -78,22 +86,8 @@ public final class OptionalsEx {
 
 			@Override
 			@Nonnull
-			public U apply(@Nonnull Optional<U> optional) {
+			public U apply(@Nonnull final Optional<U> optional) {
 				return optional.or(defaultValue);
-			}
-		};
-	}
-
-	@Nonnull
-	public static <U> Function<Optional<U>, U> toValueOr(final Supplier<U> supplier) {
-		checkNotNull(supplier);
-
-		return new Function<Optional<U>, U>() {
-
-			@Override
-			@Nonnull
-			public U apply(@Nonnull Optional<U> optional) {
-				return optional.or(supplier);
 			}
 		};
 	}

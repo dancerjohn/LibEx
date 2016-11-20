@@ -1,6 +1,8 @@
 package org.libex.test.theories.suppliers;
 
-import static com.google.common.collect.Lists.*;
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.transform;
 
 import java.util.List;
 
@@ -19,9 +21,6 @@ import com.google.common.base.Joiner;
  * Abstract base class for Test Supplier classes. Handles checking for
  * {@link ReturnAsList}.
  * 
- * For an example about how this could be used, see
- * {@code org.libex.test.theories.suppliers} in Examples.
- * 
  * @author John Butler
  * 
  */
@@ -30,17 +29,28 @@ public abstract class AbstractParameterSupplier<T> extends ParameterSupplier {
 
 	private static final Joiner commaJoiner = Joiner.on(",");
 
-	@Nonnull
-	public abstract List<T> getTestValues(ParameterSignature sig);
+    public static String checkForNull(
+            final String input)
+    {
+        if (isNullOrEmpty(input)
+                || TestOn.NULL.equals(input)) {
+            return null;
+        } else {
+            return input;
+        }
+    }
 
 	@Nonnull
-	protected abstract String toKey(T record);
+	public abstract List<T> getTestValues(final ParameterSignature sig);
+
+	@Nonnull
+	protected abstract String toKey(final T record);
 
 	private Function<T, String> toKey = new Function<T, String>() {
 
 		@Override
 		@Nullable
-		public String apply(@Nullable T record) {
+		public String apply(@Nullable final T record) {
 			return toKey(record);
 		}
 	};
@@ -49,14 +59,14 @@ public abstract class AbstractParameterSupplier<T> extends ParameterSupplier {
 
 		@Override
 		@Nullable
-		public PotentialAssignment apply(@Nullable T record) {
+		public PotentialAssignment apply(@Nullable final T record) {
 			return PotentialAssignment.forValue(toKey(record), record);
 		}
 	};
 
 	@Override
 	@Nonnull
-	public List<PotentialAssignment> getValueSources(ParameterSignature sig) {
+	public List<PotentialAssignment> getValueSources(final ParameterSignature sig) {
 		List<T> records = getTestValues(sig);
 
 		if (sig.getAnnotation(ReturnAsList.class) == null) {

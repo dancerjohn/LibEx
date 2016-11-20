@@ -6,8 +6,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Date;
 
-import junit.framework.Assert;
 
+
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;

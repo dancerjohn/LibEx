@@ -20,37 +20,41 @@ import com.google.common.base.Strings;
 
 /**
  * Allows for testing multiple reference values using Theories.
- * 
- * @author John Butler
- * 
  */
 @Retention(RetentionPolicy.RUNTIME)
 @ParametersSuppliedBy(TestOnReferenceSupplier.class)
 @Target(ElementType.PARAMETER)
 public @interface TestOnReference {
-	/**
-	 * The class from which to retrieve the fields. Generally this is the test
-	 * class.
-	 */
+	    /**
+     * The class from which to retrieve the fields. Generally this is the test
+     * class.
+     * 
+     * @return class from which to retrieve the fields
+     */
 	Class<?> type();
 
-	/**
-	 * Optional. The name of a static field in {@code type} that is an instance
-	 * of {@code type}. This will be used to retrieve instance fields for
-	 * testing. This may remain unset if all fields to be tested are static.
-	 */
+	    /**
+     * Optional. The name of a static field in {@code type} that is an instance
+     * of {@code type}. This will be used to retrieve instance fields for
+     * testing. This may remain unset if all fields to be tested are static.
+     * 
+     * @return The name of a static field in {@code type} that is an instance
+     *         of {@code type}
+     */
 	String instance() default "";
 
-	/**
-	 * The names of the static or instance fields to be used for testing. If all
-	 * names are of static fields {@code instance} does not need to be set.
-	 */
+	    /**
+     * The names of the static or instance fields to be used for testing. If all
+     * names are of static fields {@code instance} does not need to be set.
+     * 
+     * @return names of the static or instance fields to be used for testing
+     */
 	String[] fields();
 
 	public static class TestOnReferenceSupplier extends ParameterSupplier {
 
 		@Override
-		public List<PotentialAssignment> getValueSources(ParameterSignature sig) {
+		public List<PotentialAssignment> getValueSources(final ParameterSignature sig) {
 			List<PotentialAssignment> result = newArrayList();
 
 			try {

@@ -1,180 +1,115 @@
 package org.libex.base;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.libex.hamcrest.IsOptional;
-import org.libex.test.TestBase;
+import org.junit.rules.ExpectedException;
+//import org.libex.test.TestBase;
+import org.libex.test.TestBaseLocal;
 
 import com.google.common.base.Optional;
-import com.google.common.testing.NullPointerTester.Visibility;
 
-public class SettableOnceTest extends TestBase {
-
-	public static final String VALUE = "some test value";
-
-	private SettableOnce<String> settable;
-
-	protected SettableOnce<String> createSettableWith(String name, String message) {
-		if (name != null) {
-			return SettableOnce.withName(name);
-		} else if (message != null) {
-			return SettableOnce.withMessage(message);
-		} else {
-			return SettableOnce.empty();
-		}
-	}
-
+public class SettableOnceTest extends TestBaseLocal {
+	
+	final String DEFAULT_MESSAGE = "Field cannot be set more than once";
+	SettableOnce<String> so;
+	String input1 = "Test 1", input2 = "Test 2";
+	
+	@Rule 
+	public ExpectedException thrown = ExpectedException.none();
+	
 	@Before
-	public void setUp() throws Exception {
-		settable = createSettableWith(null, null);
+	public void setUp(){
+		so = create();
 	}
-
-	@Test
-	public void testNulls() {
-		nullPointerTester.testConstructors(SettableOnce.class, Visibility.PROTECTED);
-		nullPointerTester.testInstanceMethods(settable, Visibility.PROTECTED);
+	
+	protected SettableOnce<String> create(){
+		return new SettableOnce<String>();
 	}
-
+	
 	@Test
-	public void testSet_whenEmpty() {
-		// test
-		settable.set(VALUE);
-
-		// verify
-		assertThat(settable.get(), equalTo(VALUE));
+	public void testNulls(){
+		nullPointerTester.testAllPublicConstructors(so.getClass());
+		nullPointerTester.testAllPublicInstanceMethods(so);
 	}
-
+	
 	@Test
-	public void testSet_whenNotEmptyNoMessage() {
+	public void defaultConstructorTest(){
+		assertNull(so.get());
+		assertEquals(so.getOptional(), Optional.absent());
+		assertEquals(so.getMessage(), DEFAULT_MESSAGE);
+	}
+	
+	@Test
+	public void ParameterizedConstructorTest(){
+		so = new SettableOnce<String>(input1);
+		
+		assertNull(so.get());
+		assertEquals(so.getOptional(), Optional.absent());
+		assertEquals(so.getMessage(), "Field " + input1 + " cannot be set more than once");
+	}
+	
+	@Test
+	public void set_ValueTest(){
+		so.set(input1);
+		assertEquals(so.getOptional(), Optional.of(input1));
+		assertEquals(so.get(), input1);
+		assertEquals(so.getMessage(), DEFAULT_MESSAGE);
+	}
+	
+	@Test 
+	public void set_setTwiceTest(){
 		// setup
-		settable.set(VALUE);
-
-		// expect
-		expectedException.expect(IllegalStateException.class);
-		expectedException.expectMessage("Field cannot be set more than once");
-
+		so.set(input1);
+		
+		// use ExpectedException @Rule
+		thrown.expect(IllegalStateException.class);
+		thrown.expectMessage(DEFAULT_MESSAGE);
+		
 		// test
-		settable.set(VALUE);
+		so.set(input2);
 	}
-
-	@Test
-	public void testSet_whenNotEmptyWithName() {
+	
+	@Test 
+	public void setIfAbsent_twiceTest(){
 		// setup
-		settable = createSettableWith("MyName", null);
-		settable.set(VALUE);
-
-		// expect
-		expectedException.expect(IllegalStateException.class);
-		expectedException.expectMessage("Field MyName cannot be set more than once");
+		so.setIfAbsent(input1);
 
 		// test
-		settable.set(VALUE);
+		so.setIfAbsent(input2);
+
+		// verify
+		assertEquals(so.getOptional(), Optional.of(input1));
+		assertEquals(so.get(), input1);
 	}
 
-	@Test
-	public void testSet_whenNotEmptyWithMessage() {
+	@Test 
+	public void setIfAbsent_thenSetTest(){
 		// setup
-		final String message = "this is some random message";
-		settable = createSettableWith(null, message);
-		settable.set(VALUE);
-
-		// expect
-		expectedException.expect(IllegalStateException.class);
-		expectedException.expectMessage(message);
+		so.setIfAbsent(input1);
+		
+		thrown.expect(IllegalStateException.class);
+		thrown.expectMessage(DEFAULT_MESSAGE);
 
 		// test
-		settable.set(VALUE);
+		so.set(input2);
 	}
-
-	@Test
-	public void testSetIfAbsent_whenEmpty() {
-		// test
-		settable.setIfAbsent(VALUE);
-
-		// verify
-		assertThat(settable.get(), equalTo(VALUE));
+	
+	@Test 
+	public void setIfAbsent_SecondNullTest(){
+		so.setIfAbsent(input1);
+		
+		thrown.expect(NullPointerException.class);
+		
+		so.setIfAbsent(null);
 	}
-
+	
 	@Test
-	public void testSetIfAbsent_whenNotEmpty() {
-		// setup
-		settable.set(VALUE);
-
-		// test
-		settable.setIfAbsent("somthing else");
-
-		// verify
-		assertThat(settable.get(), equalTo(VALUE));
-	}
-
-	@Test
-	public void testGetOptional_whenEmpty() {
-		// test
-		Optional<String> result = settable.getOptional();
-
-		// verify
-		assertThat(result, IsOptional.absent(String.class));
-	}
-
-	@Test
-	public void testGetOptional_whenNotEmpty() {
-		// setup
-		settable.set(VALUE);
-
-		// test
-		Optional<String> result = settable.getOptional();
-
-		// verify
-		assertThat(result, IsOptional.presentContaining(VALUE));
-	}
-
-	@Test
-	public void testGetMessage_NoMessage() {
-		// test
-		String message = settable.getMessage();
-
-		// verify
-		assertThat(message, equalTo("Field cannot be set more than once"));
-	}
-
-	@Test
-	public void testGetMessage_WithName() {
-		// setup
-		settable = createSettableWith("MyName", null);
-
-		// test
-		String message = settable.getMessage();
-
-		// verify
-		assertThat(message, equalTo("Field MyName cannot be set more than once"));
-	}
-
-	@Test
-	public void testGetMessage_WithMessage() {
-		// setup
-		final String setMessage = "this is some random message";
-		settable = createSettableWith(null, setMessage);
-
-		// test
-		String message = settable.getMessage();
-
-		// verify
-		assertThat(message, equalTo(setMessage));
-	}
-
-	@Test
-	public void testSetMessage() {
-		// setup
-		final String setMessage = "this is some random message";
-		settable = createSettableWith("MyName", null);
-
-		// test
-		settable.setMessage(setMessage);
-
-		// verify
-		assertThat(settable.getMessage(), equalTo(setMessage));
+	public void setMessageTest(){
+		so.setMessage(input1);
+		assertEquals(so.getMessage(), input1);
 	}
 }

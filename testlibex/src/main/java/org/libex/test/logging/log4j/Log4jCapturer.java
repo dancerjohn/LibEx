@@ -3,8 +3,11 @@ package org.libex.test.logging.log4j;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Predicates.and;
 import static com.google.common.collect.Iterables.find;
+import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.libex.logging.log4j.LoggingEventsEx.toMessage;
 
 import java.util.List;
 
@@ -31,365 +34,423 @@ import org.libex.logging.log4j.InMemoryAppender;
 import org.libex.logging.log4j.LoggingEventsEx;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
 /**
  * Rule that allows for capturing Log4J logging for test verification.
- * 
+ *
  * @author John Butler
- * 
+ *
  */
 @NotThreadSafe
 @ParametersAreNonnullByDefault
 public class Log4jCapturer implements TestRule {
 
-	private static final String DEFAULT_LAYOUT = "%d{DATE} %5p %C{1}.%M(),%L - %m%n";
-	private static final String APPENDER_NAME = "Log4jCapturerAppender";
+    private static final String DEFAULT_LAYOUT = "%d{DATE} %5p %C{1}.%M(),%L - %m%n";
+    private static final String APPENDER_NAME = "Log4jCapturerAppender";
 
-	/**
-	 * @return new capturer builder
-	 */
-	public static Log4jCapturerBuilder builder() {
-		return new Log4jCapturerBuilder();
-	}
+    /**
+     * @return new capturer builder
+     */
+    public static Log4jCapturerBuilder builder() {
+        return new Log4jCapturerBuilder();
+    }
 
-	/**
-	 * Builder for {@link Log4jCapturer}
-	 */
-	public static class Log4jCapturerBuilder {
-		private Level threshold = Level.INFO;
-		private Layout layout = new PatternLayout(DEFAULT_LAYOUT);
+    /**
+     * Builder for {@link Log4jCapturer}
+     */
+    public static class Log4jCapturerBuilder {
+        // private Logger logger = Logger.getRootLogger();
+        private List<Logger> loggers = newArrayList();
+        private Level threshold = Level.INFO;
+        private Layout layout = new PatternLayout(DEFAULT_LAYOUT);
 
-		/**
-		 * Sets the logging threshold for messages that should be recorded. This
-		 * is set as the threshold on the created {@link Appender}
-		 * 
-		 * @param threshold
-		 *            the lowest level of messages that should be held
-		 * @return this instance
-		 * 
-		 * @see org.apache.log4j.AppenderSkeleton#setThreshold(org.apache.log4j.Priority)
-		 */
-		public Log4jCapturerBuilder setThreshold(Level threshold) {
-			this.threshold = threshold;
-			return this;
-		}
+        /**
+         * Sets the logging threshold for messages that should be recorded. This
+         * is set as the threshold on the created {@link Appender}
+         *
+         * @param threshold
+         *            the lowest level of messages that should be held
+         * @return this instance
+         *
+         * @see org.apache.log4j.AppenderSkeleton#setThreshold(org.apache.log4j.Priority)
+         */
+        public Log4jCapturerBuilder setThreshold(final Level threshold) {
+            this.threshold = threshold;
+            return this;
+        }
 
-		/**
-		 * Sets the logging layout for message that are recorded. This is set as
-		 * the layout on the created {@link Appender}
-		 * 
-		 * @param layout
-		 *            the layout to set
-		 * @return this instance
-		 * 
-		 * @see org.apache.log4j.AppenderSkeleton#setLayout(Layout)
-		 */
-		public Log4jCapturerBuilder setLayout(Layout layout) {
-			this.layout = layout;
-			return this;
-		}
+        /**
+         * Sets the logging layout for message that are recorded. This is set as
+         * the layout on the created {@link Appender}
+         *
+         * @param layout
+         *            the layout to set
+         * @return this instance
+         *
+         * @see org.apache.log4j.AppenderSkeleton#setLayout(Layout)
+         */
+        public Log4jCapturerBuilder setLayout(final Layout layout) {
+            this.layout = layout;
+            return this;
+        }
 
-		/**
-		 * @return a new {@link Log4jCapturer}
-		 */
-		public Log4jCapturer build() {
-			return new Log4jCapturer(threshold, layout);
-		}
-	}
+        /**
+         * Add the logger for messages that are recorded.
+         *
+         * @param logger
+         *            the logger to add
+         * @return this instance
+         */
+        public Log4jCapturerBuilder addLogger(
+                final String logger)
+        {
+            this.loggers.add(Logger.getLogger(logger));
+            return this;
+        }
 
-	private final InMemoryAppender appender;
+        /**
+         * @return a new {@link Log4jCapturer}
+         */
+        public Log4jCapturer build() {
+            return new Log4jCapturer(threshold, layout, loggers);
+        }
+    }
 
-	private Log4jCapturer(Level threshold, Layout layout) {
-		appender = new InMemoryAppender();
-		appender.setThreshold(threshold);
-		appender.setLayout(layout);
-		appender.setName(APPENDER_NAME);
-	}
+    private final InMemoryAppender appender;
+    private final List<Logger> loggers;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.junit.rules.TestRule#apply(org.junit.runners.model.Statement,
-	 * org.junit.runner.Description)
-	 */
-	@Override
-	public Statement apply(final Statement statement, Description description) {
-		return new Statement() {
+    private Log4jCapturer(
+            final Level threshold,
+            final Layout layout,
+            final List<Logger> loggers) {
+        appender = new InMemoryAppender();
+        appender.setThreshold(threshold);
+        appender.setLayout(layout);
+        appender.setName(APPENDER_NAME);
+        this.loggers = (loggers.isEmpty()) ? newArrayList(Logger.getRootLogger()) : ImmutableList.copyOf(loggers);
 
-			@Override
-			public void evaluate() throws Throwable {
-				addAppender();
+        for (Logger logger : this.loggers) {
+            logger.setLevel(threshold);
+        }
+    }
 
-				try {
-					statement.evaluate();
-				} finally {
-					removeAppender();
-				}
-			}
-		};
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.junit.rules.TestRule#apply(org.junit.runners.model.Statement,
+     * org.junit.runner.Description)
+     */
+    @Override
+    public Statement apply(final Statement statement, final Description description) {
+        return new Statement() {
 
-	private void addAppender() {
-		appender.clear();
-		Logger.getRootLogger().addAppender(appender);
-	}
+            @Override
+            public void evaluate() throws Throwable {
+                addAppender();
 
-	private void removeAppender() {
-		try {
-			appender.clear();
-			Logger.getRootLogger().removeAppender(appender);
-		} catch (RuntimeException e) {
-			e.printStackTrace();
-		}
-	}
+                try {
+                    statement.evaluate();
+                } finally {
+                    removeAppender();
+                }
+            }
+        };
+    }
 
-	/**
-	 * Clears the list of currently recorded logs.
-	 */
-	public void clearLog() {
-		appender.clear();
-	}
+    private void addAppender() {
+        appender.clear();
 
-	/**
-	 * Gets the list of logs that matches the passed assertion
-	 * 
-	 * @param assertion
-	 *            the filter by which to retrieve logs
-	 * @return an unmodifiable Iterable over the list of logs that match the
-	 *         passed assertion
-	 */
-	public Iterable<LoggingEvent> filter(Predicate<LoggingEvent> assertion) {
-		List<LoggingEvent> logs = appender.getLoggingEvents();
-		return Iterables.filter(logs, assertion);
-	}
+        for (Logger logger : loggers) {
+            logger.addAppender(appender);
+        }
+    }
 
-	/**
-	 * Gets the list of logs that matches the passed assertion
-	 * 
-	 * @param assertion
-	 *            the filter by which to retrieve logs
-	 * @return an unmodifiable Iterable over the list of logs that match the
-	 *         passed assertion
-	 */
-	public Iterable<LoggingEvent> getLogs(LogAssertion assertion) {
-		return filter(assertion.criteria());
-	}
+    private void removeAppender() {
+        try {
+            appender.clear();
+            for (Logger logger : loggers) {
+                logger.removeAppender(appender);
+            }
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+    }
 
-	/**
-	 * Asserts the passed assertion
-	 * 
-	 * @param assertion
-	 *            the logging assertion to verify
-	 */
-	public void assertThat(LogAssertion assertion) {
+    /**
+     * Clears the list of currently recorded logs.
+     */
+    public void clearLog() {
+        appender.clear();
+    }
 
-		List<LoggingEvent> logs = appender.getLoggingEvents();
+    /**
+     * Gets the list of logs that matches the passed assertion
+     *
+     * @param assertion
+     *            the filter by which to retrieve logs
+     * @return an unmodifiable Iterable over the list of logs that match the
+     *         passed assertion
+     */
+    public Iterable<LoggingEvent> filter(final Predicate<LoggingEvent> assertion) {
+        List<LoggingEvent> logs = appender.getLoggingEvents();
+        return Iterables.filter(logs, assertion);
+    }
 
-		if (assertion.times <= 1) {
-			LoggingEvent event = find(logs, assertion.criteria(), null);
+    /**
+     * Gets the list of logs that matches the passed assertion
+     *
+     * @param assertion
+     *            the filter by which to retrieve logs
+     * @return an unmodifiable Iterable over the list of logs that match the
+     *         passed assertion
+     */
+    public Iterable<LoggingEvent> getLogs(final LogAssertion assertion) {
+        return filter(assertion.criteria());
+    }
 
-			Matcher<Object> matcher = (assertion.logged) ? notNullValue()
-					: nullValue();
-			MatcherAssert.assertThat(assertion.toString(), event, matcher);
-		}
-		else {
-			Iterable<LoggingEvent> event = Iterables.filter(logs, assertion.criteria());
-			MatcherAssert.assertThat(assertion.toString(), event,
-					IsIterableWithSize.<LoggingEvent> iterableWithSize(assertion.times));
-		}
-	}
+    /**
+     * Gets the list of log messages for the logs that match the passed assertion
+     *
+     * @param assertion
+     *            the filter by which to retrieve logs
+     * @return an unmodifiable Iterable over the list of log messages for logs
+     *         that match the passed assertion
+     */
+    public Iterable<String> getLogMessages(final LogAssertion assertion) {
+        return transform(getLogs(assertion), toMessage());
+    }
 
-	/**
-	 * A LoggingEvent assertion
-	 */
-	public static class LogAssertion {
+    /**
+     * Asserts the passed assertion
+     *
+     * @param assertion
+     *            the logging assertion to verify
+     */
+    public void assertThat(final LogAssertion assertion) {
 
-		/**
-		 * @return a new empty assertion with default values
-		 */
-		public static LogAssertion newLogAssertion() {
-			return new LogAssertion();
-		}
+        List<LoggingEvent> logs = appender.getLoggingEvents();
 
-		private boolean logged = true;
-		private int times = 1;
-		private Matcher<? super Level> level = Matchers.anything();
-		private Matcher<? super String> message = Matchers.anything();
-		private Matcher<? super Throwable> exception = Matchers.anything();
+        if (assertion.times <=1 ) {
+            LoggingEvent event = find(logs, assertion.criteria(), null);
 
-		/**
-		 * Sets the assertion to expect the message to be logged. This method
-		 * should be used in conjunction with one of the other {@code withX}
-		 * methods. This method is mutually exclusive with
-		 * {@link #isNotLogged()}
-		 * 
-		 * @return this instance
-		 */
-		public LogAssertion isLogged() {
-			return isLogged(1);
-		}
+            Matcher<Object> matcher = (assertion.logged) ? notNullValue()
+                    : nullValue();
+            MatcherAssert.assertThat(assertion.toString(), event, matcher);
+        } else {
+            Iterable<LoggingEvent> event = Iterables.filter(logs, assertion.criteria());
+            MatcherAssert.assertThat(assertion.toString(), event,
+                    IsIterableWithSize.<LoggingEvent> iterableWithSize(assertion.times));
+        }
 
-		/**
-		 * Sets the assertion to expect the message to be logged. This method
-		 * should be used in conjunction with one of the other {@code withX}
-		 * methods. This method is mutually exclusive with
-		 * {@link #isNotLogged()}
-		 * 
-		 * @param times
-		 *            the number of times to expect the message to be logged.
-		 *            Values 0 or greater are valid. If 0, will cause the
-		 *            expectation that the message was NOT logged
-		 * @return this instance
-		 */
-		public LogAssertion isLogged(int times) {
-			checkArgument(times >= 0);
+    }
 
-			if (times == 0) {
-				return isNotLogged();
-			} else {
-				this.logged = true;
-				this.times = times;
-				return this;
-			}
-		}
+    /**
+     * Asserts that the passed substring was logged at the passed level
+     *
+     * @param level
+     *          the expected level
+     * @param substring
+     *          the expected substring
+     */
+    public void assertRenderedMessageLogged(final Level level, final String substring) {
+        assertThat(LogAssertion.newLogAssertion()
+                .isLogged()
+                .withLevel(level)
+                .withRenderedMessage(substring));
+    }
 
-		/**
-		 * Sets the assertion to expect the message to NOT be logged. This
-		 * method should be used in conjunction with one of the other
-		 * {@code withX} methods. This method is mutually exclusive with
-		 * {@link #isLogged()}
-		 * 
-		 * @return this instance
-		 */
-		public LogAssertion isNotLogged() {
-			this.logged = false;
-			this.times = 0;
-			return this;
-		}
+    /**
+     * A LoggingEvent assertion
+     */
+    public static class LogAssertion {
 
-		/**
-		 * Sets the assertion to expect the message to have the passed
-		 * {@code level}. The use of this method is sufficient to assert a
-		 * message is logged. No other method calls are required, other than the
-		 * call to {@link Log4jCapturer#assertThat(LogAssertion)}.
-		 * 
-		 * @param level
-		 *            the level to expect
-		 * @return this instance
-		 */
-		public LogAssertion withLevel(Level level) {
-			return withLevel(Matchers.equalTo(level));
-		}
+        /**
+         * @return a new empty assertion with default values
+         */
+        public static LogAssertion newLogAssertion() {
+            return new LogAssertion();
+        }
 
-		/**
-		 * Sets the assertion to expect the message to have a level that matches
-		 * the passed {@code level}. The use of this method is sufficient to
-		 * assert a message is logged. No other method calls are required, other
-		 * than the call to {@link Log4jCapturer#assertThat(LogAssertion)}.
-		 * 
-		 * @param level
-		 *            the level to expect
-		 * @return this instance
-		 */
-		public LogAssertion withLevel(Matcher<? super Level> level) {
-			this.level = level;
-			return this;
-		}
+        private boolean logged = true;
+        private int times = 1;
+        private Matcher<? super Level> level = Matchers.anything();
+        private Matcher<? super String> message = Matchers.anything();
+        private Matcher<?> exception = Matchers.anything();
 
-		/**
-		 * Sets the assertion to expect the rendered (formatted) message to have
-		 * a message that is super-string of the passed {@code substring}. The
-		 * use of this method is sufficient to assert a message is logged. No
-		 * other method calls are required, other than the call to
-		 * {@link Log4jCapturer#assertThat(LogAssertion)}.
-		 * 
-		 * @param substring
-		 *            the message to expect
-		 * @return this instance
-		 */
-		public LogAssertion withRenderedMessage(String substring) {
-			return withRenderedMessage(Matchers.containsString(substring));
-		}
+        /**
+         * Sets the assertion to expect the message to be logged. This method
+         * should be used in conjunction with one of the other {@code withX} methods. This method is mutually exclusive
+         * with {@link #isNotLogged()}
+         *
+         * @return this instance
+         */
+        public LogAssertion isLogged() {
+            return isLogged(1);
+        }
 
-		/**
-		 * Sets the assertion to expect the rendered (formatted) message to
-		 * match the passed {@code message}. The use of this method is
-		 * sufficient to assert a message is logged. No other method calls are
-		 * required, other than the call to
-		 * {@link Log4jCapturer#assertThat(LogAssertion)}.
-		 * 
-		 * @param message
-		 *            the message to expect
-		 * @return this instance
-		 */
-		public LogAssertion withRenderedMessage(Matcher<? super String> message) {
-			this.message = message;
-			return this;
-		}
+        /**
+         * Sets the assertion to expect the message to be logged. This method
+         * should be used in conjunction with one of the other {@code withX} methods. This method is mutually exclusive
+         * with {@link #isNotLogged()}
+         *
+         *  @param times
+         *              the number of times to expect the message to be logged.
+         *              Values 0 or greater are valid, If 0, will cause the
+         *              expectation that the message was NOT logged
+         * @return this instance
+         */
+        public LogAssertion isLogged(final int times) {
+            checkArgument(times >= 0);
 
-		public LogAssertion withException(Class<? extends Throwable> exception) {
-			withException(CoreMatchers.instanceOf(exception));
-			return this;
-		}
+            if (times == 0) {
+                return isNotLogged();
+            } else {
+                this.logged = true;
+                this.times = times;
+                return this;
+            }
+        }
 
-		/**
-		 * Sets the assertion to expect the logging event to c ontain an
-		 * exception that matches the passed {@code exception}. The use of this
-		 * method is sufficient to assert a message is logged. No other method
-		 * calls are required, other than the call to
-		 * {@link Log4jCapturer#assertThat(LogAssertion)}.
-		 * 
-		 * @param exception
-		 *            the exception matcher, consider {@link IsThrowable}
-		 * @return this instance
-		 */
-		public LogAssertion withException(Matcher<? super Throwable> exception) {
-			this.exception = exception;
-			return this;
-		}
+        /**
+         * Sets the assertion to expect the message to NOT be logged. This
+         * method should be used in conjunction with one of the other {@code withX} methods. This method is mutually
+         * exclusive with {@link #isLogged()}
+         *
+         * @return this instance
+         */
+        public LogAssertion isNotLogged() {
+            this.logged = false;
+            this.times = 0;
+            return this;
+        }
 
-		@SuppressWarnings("unchecked")
-		private Predicate<LoggingEvent> criteria() {
-			return and(LoggingEventsEx.withLevel(level),
-					LoggingEventsEx.withRenderedMessage(message),
-					LoggingEventsEx.withThrowable(exception));
-		}
+        /**
+         * Sets the assertion to expect the message to have the passed {@code level}. The use of this method is
+         * sufficient to assert a
+         * message is logged. No other method calls are required, other than the
+         * call to {@link Log4jCapturer#assertThat(LogAssertion)}.
+         *
+         * @param level
+         *            the level to expect
+         * @return this instance
+         */
+        public LogAssertion withLevel(final Level level) {
+            return withLevel(Matchers.equalTo(level));
+        }
 
-		@Override
-		public String toString() {
-			org.hamcrest.Description description = new StringDescription();
+        /**
+         * Sets the assertion to expect the message to have a level that matches
+         * the passed {@code level}. The use of this method is sufficient to
+         * assert a message is logged. No other method calls are required, other
+         * than the call to {@link Log4jCapturer#assertThat(LogAssertion)}.
+         *
+         * @param level
+         *            the level to expect
+         * @return this instance
+         */
+        public LogAssertion withLevel(final Matcher<? super Level> level) {
+            this.level = level;
+            return this;
+        }
 
-			if (logged) {
-				description.appendText("Message logged");
-			} else {
-				description.appendText("No message logged");
-			}
+        /**
+         * Sets the assertion to expect the rendered (formatted) message to have
+         * a message that is super-string of the passed {@code substring}. The
+         * use of this method is sufficient to assert a message is logged. No
+         * other method calls are required, other than the call to {@link Log4jCapturer#assertThat(LogAssertion)}.
+         *
+         * @param substring
+         *            the message to expect
+         * @return this instance
+         */
+        public LogAssertion withRenderedMessage(final String substring) {
+            return withRenderedMessage(Matchers.containsString(substring));
+        }
 
-			if (times > 0) {
-				description.appendText(" " + times + " time(s) ");
-			}
+        /**
+         * Sets the assertion to expect the rendered (formatted) message to
+         * match the passed {@code message}. The use of this method is
+         * sufficient to assert a message is logged. No other method calls are
+         * required, other than the call to {@link Log4jCapturer#assertThat(LogAssertion)}.
+         *
+         * @param message
+         *            the message to expect
+         * @return this instance
+         */
+        public LogAssertion withRenderedMessage(final Matcher<? super String> message) {
+            this.message = message;
+            return this;
+        }
 
-			if (notIsAnything(level)) {
-				description.appendText(" with level ");
-				description.appendDescriptionOf(level);
-			}
+        /**
+         * Sets the assertion to expect the logging event to contain an
+         * exception that matches the passed {@code exception}. The use of this
+         * method is sufficient to assert a message is logged. No other method
+         * calls are required, other than the call to {@link Log4jCapturer#assertThat(LogAssertion)}.
+         *
+         * @param exception
+         *            the exception matcher, consider {@link IsThrowable}
+         * @return this instance
+         */
+        public LogAssertion withException(final Class<? extends Throwable> exception) {
+            return withException(CoreMatchers.instanceOf(exception));
+        }
 
-			if (notIsAnything(message)) {
-				description.appendText(" with message ");
-				description.appendDescriptionOf(message);
-			}
+        /**
+         * Sets the assertion to expect the logging event to contain an
+         * exception that matches the passed {@code exception}. The use of this
+         * method is sufficient to assert a message is logged. No other method
+         * calls are required, other than the call to {@link Log4jCapturer#assertThat(LogAssertion)}.
+         *
+         * @param exception
+         *            the exception matcher, consider {@link IsThrowable}
+         * @return this instance
+         */
+        public LogAssertion withException(final Matcher<?> exception)
+        {
+            this.exception = exception;
+            return this;
+        }
 
-			if (notIsAnything(exception)) {
-				description.appendText(" with exception ");
-				description.appendDescriptionOf(exception);
-			}
+        @SuppressWarnings("unchecked")
+        private Predicate<LoggingEvent> criteria() {
+            return and(LoggingEventsEx.withLevel(level),
+                    LoggingEventsEx.withRenderedMessage(message),
+                    LoggingEventsEx.withThrowable(exception));
+        }
 
-			return description.toString();
-		}
+        @Override
+        public String toString() {
+            org.hamcrest.Description description = new StringDescription();
 
-		private boolean notIsAnything(Matcher<?> matcher) {
-			return !(matcher instanceof org.hamcrest.core.IsAnything);
-		}
-	}
+            if (logged) {
+                description.appendText("Message logged");
+            } else {
+                description.appendText("No message logged");
+            }
+
+            if (notIsAnything(level)) {
+                description.appendText(" with level ");
+                description.appendDescriptionOf(level);
+            }
+
+            if (notIsAnything(message)) {
+                description.appendText(" with message ");
+                description.appendDescriptionOf(message);
+            }
+
+            if (notIsAnything(exception)) {
+                description.appendText(" with exception ");
+                description.appendDescriptionOf(exception);
+            }
+
+            return description.toString();
+        }
+
+        private boolean notIsAnything(final Matcher<?> matcher) {
+            return !(matcher instanceof org.hamcrest.core.IsAnything);
+        }
+    }
 }

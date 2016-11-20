@@ -22,41 +22,23 @@ import com.google.common.base.Supplier;
 @NotThreadSafe
 public class SettableOnce<T> implements Supplier<T> {
 
-	/**
-	 * @return a new empty {@link SettableOnce}
-	 */
-	public static <T> SettableOnce<T> empty() {
-		return new SettableOnce<T>("Field cannot be set more than once");
+	private Optional<T> value = Optional.absent();
+	private String message;
+
+	public SettableOnce() {
+		this.message = "Field cannot be set more than once";
 	}
 
 	/**
 	 * @param name
 	 *            the name of the field to be included in error messages
-	 * @return a new empty {@link SettableOnce}
 	 * @throws NullPointerException
 	 *             if name is null
 	 */
-	public static <T> SettableOnce<T> withName(String name) {
+	public SettableOnce(String name) {
 		checkNotNull(name);
-		return new SettableOnce<T>("Field " + name + " cannot be set more than once");
-	}
 
-	/**
-	 * @param message
-	 *            the error message to use
-	 * @return a new empty {@link SettableOnce}
-	 * @throws NullPointerException
-	 *             if message is null
-	 */
-	public static <T> SettableOnce<T> withMessage(String message) {
-		return new SettableOnce<T>(message);
-	}
-
-	private Optional<T> value = Optional.absent();
-	private String message;
-
-	protected SettableOnce(String message) {
-		this.message = checkNotNull(message);
+		this.message = "Field " + name + " cannot be set more than once";
 	}
 
 	/**
@@ -79,9 +61,11 @@ public class SettableOnce<T> implements Supplier<T> {
 	 *            the value to set if this instance has not already been set
 	 * 
 	 * @throws NullPointerException
-	 *             if value has not been set and input is null
+	 *             if input is null
 	 */
 	public void setIfAbsent(T input) {
+		checkNotNull(input);
+		
 		if (!value.isPresent()) {
 			value = Optional.of(input);
 		}
@@ -109,7 +93,7 @@ public class SettableOnce<T> implements Supplier<T> {
 	}
 
 	protected void setMessage(String message) {
-		this.message = checkNotNull(message);
+		this.message = message;
 	}
 
 }

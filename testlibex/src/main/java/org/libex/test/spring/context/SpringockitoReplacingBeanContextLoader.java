@@ -17,8 +17,6 @@ import org.springframework.context.support.GenericApplicationContext;
  * <p>
  * {@link GenerateContextBeanReplacements}
  * <p>
- * 
- * <p>
  * Basic usage:
  * 
  * <pre>
@@ -43,20 +41,20 @@ public class SpringockitoReplacingBeanContextLoader extends SpringockitoContextL
 	private final ReplacingBeanContextLoader wrappedLoader = new ReplacingBeanContextLoader();
 
 	@Override
-	protected void customizeContext(GenericApplicationContext context) {
+	protected void customizeContext(final GenericApplicationContext context) {
 		super.customizeContext(context);
 
 		wrappedLoader.registerBeans(context);
 	}
 
 	@Override
-	protected String[] generateDefaultLocations(Class<?> clazz) {
+	protected String[] generateDefaultLocations(final Class<?> clazz) {
 		wrappedLoader.inspectClass(clazz);
 		return super.generateDefaultLocations(clazz);
 	}
 
 	@Override
-	protected String[] modifyLocations(Class<?> arg0, String... arg1) {
+	protected String[] modifyLocations(final Class<?> arg0, final String... arg1) {
 		wrappedLoader.inspectClass(arg0);
 		return super.modifyLocations(arg0, arg1);
 	}

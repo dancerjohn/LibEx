@@ -10,16 +10,15 @@ import java.lang.annotation.Target;
  * injection into a Spring context. The methods marked by this annotation should
  * take no arguments and return a {@code Map<String, Object>}.
  * <p>
- * 
- * <p>
  * Basic usage:
  * 
  * <pre>
  * &#064;GenerateContextBeanReplacements
- * public Map&lt;String, Object&gt; myFactoryMethod() {
- * 	Map&lt;String, Objects&gt; map = new HashMap&lt;String, Object&gt;();
- * 	map.put(&quot;beanName&quot;, beanInstance);
- * 	return map;
+ * public Map&lt;String, Object&gt; myFactoryMethod()
+ * {
+ *     Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();
+ *     map.put(&quot;beanName&quot;, beanInstance);
+ *     return map;
  * }
  * </pre>
  * <p>

@@ -15,14 +15,7 @@ import com.google.common.primitives.Longs;
 
 /**
  * Specifies a period of time. The idea for this class was taken from the Guava
- * Issues post 631.
- * 
- * {@link http://code.google.com/p/guava-libraries/issues/detail?id=631}
- * 
- * @author John Butler
- * 
- * @deprecated Use Joda Duration
- * @see Duration
+ * Use {@link org.joda.time.Duration}
  */
 @ParametersAreNonnullByDefault
 @ThreadSafe
@@ -34,7 +27,7 @@ public final class TimeSpan implements Comparable<TimeSpan> {
 		return new TimeSpan(TimeUnit.NANOSECONDS);
 	}
 
-	public static TimeSpan nanosecods(long duration) {
+	public static TimeSpan nanosecods(final long duration) {
 		return new TimeSpan(duration, TimeUnit.NANOSECONDS);
 	}
 
@@ -42,7 +35,7 @@ public final class TimeSpan implements Comparable<TimeSpan> {
 		return new TimeSpan(TimeUnit.MICROSECONDS);
 	}
 
-	public static TimeSpan microseconds(long duration) {
+	public static TimeSpan microseconds(final long duration) {
 		return new TimeSpan(duration, TimeUnit.MICROSECONDS);
 	}
 
@@ -50,7 +43,7 @@ public final class TimeSpan implements Comparable<TimeSpan> {
 		return new TimeSpan(TimeUnit.MILLISECONDS);
 	}
 
-	public static TimeSpan milliseconds(long duration) {
+	public static TimeSpan milliseconds(final long duration) {
 		return new TimeSpan(duration, TimeUnit.MILLISECONDS);
 	}
 
@@ -58,7 +51,7 @@ public final class TimeSpan implements Comparable<TimeSpan> {
 		return new TimeSpan(TimeUnit.SECONDS);
 	}
 
-	public static TimeSpan seconds(long duration) {
+	public static TimeSpan seconds(final long duration) {
 		return new TimeSpan(duration, TimeUnit.SECONDS);
 	}
 
@@ -66,7 +59,7 @@ public final class TimeSpan implements Comparable<TimeSpan> {
 		return new TimeSpan(TimeUnit.MINUTES);
 	}
 
-	public static TimeSpan minutes(long duration) {
+	public static TimeSpan minutes(final long duration) {
 		return new TimeSpan(duration, TimeUnit.MINUTES);
 	}
 
@@ -74,70 +67,47 @@ public final class TimeSpan implements Comparable<TimeSpan> {
 		return new TimeSpan(TimeUnit.DAYS);
 	}
 
-	public static TimeSpan days(long duration) {
+	public static TimeSpan days(final long duration) {
 		return new TimeSpan(duration, TimeUnit.DAYS);
 	}
 
 	private final long duration;
 	private final TimeUnit timeUnit;
 
-	/**
-	 * A time span of a single specified time unit.
-	 * 
-	 * @param timeUnit
-	 *            the time unit
-	 */
-	public TimeSpan(TimeUnit timeUnit) {
+	public TimeSpan(final TimeUnit timeUnit) {
 		checkNotNull(timeUnit, "timeUnit may not be null");
 		this.duration = 1;
 		this.timeUnit = timeUnit;
 	}
 
-	/**
-	 * @param duration
-	 *            the number of time units
-	 * @param timeUnit
-	 *            the time unit
-	 */
-	public TimeSpan(long duration, TimeUnit timeUnit) {
+	public TimeSpan(final long duration, final TimeUnit timeUnit) {
 		checkNotNull(timeUnit, "timeUnit may not be null");
 		this.duration = duration;
 		this.timeUnit = timeUnit;
 	}
-
-	/**
-	 * @return the number of time units
-	 */
 	public long getDuration() {
 		return duration;
 	}
 
-	/**
-	 * Gets the number of time units in the specified unit
-	 * 
-	 * @param timeUnit
-	 *            the TimeUnit in which to return the number of units
-	 * @return
-	 * 
-	 * @see TimeUnit#convert(long, TimeUnit)
-	 */
-	public long getDurationIn(TimeUnit timeUnit) {
+    public Duration toDuration()
+    {
+        return new Duration(getDurationIn(TimeUnit.MILLISECONDS));
+    }
+
+	public long getDurationIn(final TimeUnit timeUnit) {
 		return timeUnit.convert(duration, this.timeUnit);
 	}
 
-	public TimeSpan convertTo(TimeUnit timeUnit) {
+	public TimeSpan convertTo(final TimeUnit timeUnit) {
 		return new TimeSpan(getDurationIn(timeUnit), timeUnit);
 	}
 
-	/**
-	 * @return the time unit
-	 */
 	public TimeUnit getTimeUnit() {
 		return timeUnit;
 	}
 
 	@Override
-	public int compareTo(TimeSpan other) {
+	public int compareTo(final TimeSpan other) {
 		return Longs.compare(duration, other.getDurationIn(timeUnit));
 	}
 
@@ -147,7 +117,7 @@ public final class TimeSpan implements Comparable<TimeSpan> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -166,7 +136,7 @@ public final class TimeSpan implements Comparable<TimeSpan> {
 		return TimeUnitsEx.toString(duration, timeUnit);
 	}
 
-	public String toString(TimeUnit outputTimeUnit) {
+	public String toString(final TimeUnit outputTimeUnit) {
 		return TimeUnitsEx.toString(duration, outputTimeUnit);
 	}
 }

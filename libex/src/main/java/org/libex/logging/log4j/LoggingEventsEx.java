@@ -1,6 +1,6 @@
 package org.libex.logging.log4j;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -12,13 +12,14 @@ import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.libex.hamcrest.IsThrowable;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 
 /**
  * Utilities on {@link LoggingEvent}
- * 
+ *
  * @author John Butler
- * 
+ *
  */
 @NotThreadSafe
 @ParametersAreNonnullByDefault
@@ -27,7 +28,7 @@ public final class LoggingEventsEx {
 	/**
 	 * Creates a {@link Predicate} that matches a {@link LoggingEvent} that has
 	 * the specified level
-	 * 
+	 *
 	 * @param level
 	 *            the level to match
 	 * @return a {@link Predicate} that matches a {@link LoggingEvent} that has
@@ -42,7 +43,7 @@ public final class LoggingEventsEx {
 	/**
 	 * Creates a {@link Predicate} that matches a {@link LoggingEvent} whose
 	 * level matches the passed matcher
-	 * 
+	 *
 	 * @param matcher
 	 *            the matcher to use
 	 * @return a {@link Predicate} that matches a {@link LoggingEvent} whose
@@ -55,7 +56,7 @@ public final class LoggingEventsEx {
 		return new Predicate<LoggingEvent>() {
 
 			@Override
-			public boolean apply(@Nullable LoggingEvent event) {
+			public boolean apply(@Nullable final LoggingEvent event) {
 				return event != null && matcher.matches(event.getLevel());
 			}
 		};
@@ -73,7 +74,7 @@ public final class LoggingEventsEx {
 		return new Predicate<LoggingEvent>() {
 
 			@Override
-			public boolean apply(@Nullable LoggingEvent event) {
+			public boolean apply(@Nullable final LoggingEvent event) {
 				return event != null
 						&& matcher.matches(event.getRenderedMessage());
 			}
@@ -88,11 +89,12 @@ public final class LoggingEventsEx {
 	}
 
 	public static Predicate<LoggingEvent> withThrowable(
-			final Matcher<? super Throwable> matcher) {
+            final Matcher<?> matcher)
+    {
 		return new Predicate<LoggingEvent>() {
 
 			@Override
-			public boolean apply(@Nullable LoggingEvent event) {
+			public boolean apply(@Nullable final LoggingEvent event) {
 				return event != null
 						&& matcher
 								.matches((event.getThrowableInformation() == null) ? null
@@ -101,6 +103,18 @@ public final class LoggingEventsEx {
 			}
 		};
 	}
+
+
+    private static final Function<LoggingEvent, String> TO_MESSAGE = new Function<LoggingEvent, String>() {
+        @Override
+        public String apply(final LoggingEvent event) {
+            return (String) event.getMessage();
+        }
+    };
+
+    public static Function<LoggingEvent, String> toMessage() {
+        return TO_MESSAGE;
+    }
 
 	private LoggingEventsEx() {
 	}

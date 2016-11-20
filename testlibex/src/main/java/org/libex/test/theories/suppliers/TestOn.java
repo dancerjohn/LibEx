@@ -20,12 +20,7 @@ import org.libex.test.theories.suppliers.TestOn.TestOnSupplier;
  * 
  * {@code @Thoery public void test(@TestOn(ints= 2,3,4} int value1,
  * 
- * @TestOn(booleans={true, false} boolean bool)}
- *                         <p/>
- *                         The following example will return "blah" and
- *                         {@code null}: {@code @Thoery public void
- *                         test(@TestOn(strings= "blah", TestOn.NULL} boolean
- *                         bool)}
+ * {@code @TestOn(booleans= true, false} boolean bool)}
  * 
  * @author John Butler
  * 
@@ -35,69 +30,77 @@ import org.libex.test.theories.suppliers.TestOn.TestOnSupplier;
 @Target(ElementType.PARAMETER)
 public @interface TestOn {
 
-	public static final String NULL = "null";
+    /**
+     * Value to use to achieve a null values
+     */
+    public static final String NULL = "null";
 
-	int[] ints() default {};
+    int[] ints() default {};
 
-	long[] longs() default {};
+    long[] longs() default {};
 
-	short[] shorts() default {};
+    short[] shorts() default {};
 
-	byte[] bytes() default {};
+    byte[] bytes() default {};
 
-	float[] floats() default {};
+    float[] floats() default {};
 
-	double[] doubles() default {};
+    double[] doubles() default {};
 
-	boolean[] booleans() default {};
+    boolean[] booleans() default {};
 
-	/**
-	 * A value of {@code "null"} or {@link NULL} will result in a {@code null}
-	 * value being returned
-	 */
-	String[] strings() default {};
+    /**
+     * A value of {@code "null"} or {@link NULL} will result in a {@code null} value
+     * being returned.
+     * 
+     * @return string values to test
+     */
+    String[] strings() default {};
 
-	public static class TestOnSupplier extends ParameterSupplier {
+    public static class TestOnSupplier extends ParameterSupplier {
 
-		@Override
-		public List<PotentialAssignment> getValueSources(ParameterSignature sig) {
-			List<PotentialAssignment> result = newArrayList();
+        @Override
+        public List<PotentialAssignment> getValueSources(final ParameterSignature sig) {
+            List<PotentialAssignment> result = newArrayList();
 
-			TestOn testOn = sig.getAnnotation(TestOn.class);
-			if (testOn != null) {
-				for (int i : testOn.ints()) {
-					result.add(PotentialAssignment.forValue(
-							Integer.toString(i), i));
-				}
-				for (long i : testOn.longs()) {
-					result.add(PotentialAssignment.forValue(Long.toString(i), i));
-				}
-				for (short i : testOn.shorts()) {
-					result.add(PotentialAssignment.forValue(Short.toString(i),
-							i));
-				}
-				for (byte i : testOn.bytes()) {
-					result.add(PotentialAssignment.forValue(Byte.toString(i), i));
-				}
-				for (float i : testOn.floats()) {
-					result.add(PotentialAssignment.forValue(Float.toString(i),
-							i));
-				}
-				for (double i : testOn.doubles()) {
-					result.add(PotentialAssignment.forValue(Double.toString(i),
-							i));
-				}
-				for (boolean i : testOn.booleans()) {
-					result.add(PotentialAssignment.forValue(
-							Boolean.toString(i), i));
-				}
-				for (String i : testOn.strings()) {
-					result.add(PotentialAssignment.forValue(i, ("null".equals(i) || NULL.equals(i)) ? null : i));
-				}
-			}
+            TestOn testOn = sig.getAnnotation(TestOn.class);
+            if (testOn != null) {
+                for (int i : testOn.ints()) {
+                    result.add(PotentialAssignment.forValue(
+                            Integer.toString(i), i));
+                }
+                for (long i : testOn.longs()) {
+                    result.add(PotentialAssignment.forValue(Long.toString(i), i));
+                }
+                for (short i : testOn.shorts()) {
+                    result.add(PotentialAssignment.forValue(Short.toString(i),
+                            i));
+                }
+                for (byte i : testOn.bytes()) {
+                    result.add(PotentialAssignment.forValue(Byte.toString(i), i));
+                }
+                for (float i : testOn.floats()) {
+                    result.add(PotentialAssignment.forValue(Float.toString(i),
+                            i));
+                }
+                for (double i : testOn.doubles()) {
+                    result.add(PotentialAssignment.forValue(Double.toString(i),
+                            i));
+                }
+                for (boolean i : testOn.booleans()) {
+                    result.add(PotentialAssignment.forValue(
+                            Boolean.toString(i), i));
+                }
+                for (String i : testOn.strings()) {
+                    result.add(
+                            PotentialAssignment.forValue(i,
+                                    ("null".equals(i) || NULL.equals(i))
+                                            ? null : i));
+                }
+            }
 
-			return result;
-		}
+            return result;
+        }
 
-	}
+    }
 }

@@ -35,7 +35,7 @@ public final class TimedCounter {
 	public void addEvent() {
 		synchronized (lock) {
 			clearExpired();
-			delayQueue.add(Delayeds.createDelay(timeSpan));
+			delayQueue.add(Delayeds.createDelayUsingDateSupplier(timeSpan));
 		}
 	}
 

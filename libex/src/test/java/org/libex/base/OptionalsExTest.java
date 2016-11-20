@@ -26,7 +26,7 @@ public class OptionalsExTest {
 	public static String[] strings = { "", null };
 
 	@Theory
-	public void testFromNullable(String input) {
+	public void testFromNullable(final String input) {
 		Optional<Object> optional = OptionalsEx.<Object> fromNullable().apply(input);
 		assertThat(optional.orNull(), equalTo((Object) input));
 
@@ -35,13 +35,13 @@ public class OptionalsExTest {
 	}
 
 	@Theory
-	public void testToValueOrNull(Optional<String> optional) {
-		Object value = OptionalsEx.<Object> toValueOrNull().apply(optional);
-		assertThat(value, equalTo((Object) optional.orNull()));
+	public void testToValueOrNull(final Optional<String> optional) {
+        String value = OptionalsEx.<String> toValueOrNull().apply(optional);
+        assertThat(value, equalTo(optional.orNull()));
 	}
 
 	@Theory
-	public void testToValueOr(Optional<String> optional) {
+	public void testToValueOr(final Optional<String> optional) {
 		String value = OptionalsEx.toValueOr("default").apply(optional);
 		assertThat(value, equalTo(optional.or("default")));
 	}

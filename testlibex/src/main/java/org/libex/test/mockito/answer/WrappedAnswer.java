@@ -12,8 +12,8 @@ import com.google.common.base.Optional;
 /**
  * Allows for wrapping an answer while adding behavior.
  * 
- * @author John Butler
- * 
+ * @param <T>
+ *            type to be returned by the Answer
  */
 @ThreadSafe
 @ParametersAreNonnullByDefault
@@ -22,7 +22,7 @@ public abstract class WrappedAnswer<T> implements Answer<T> {
 	@Nullable
 	private final Answer<T> delegate;
 
-	protected WrappedAnswer(@Nullable Answer<T> delegate) {
+	protected WrappedAnswer(@Nullable final Answer<T> delegate) {
 		super();
 		this.delegate = delegate;
 	}
@@ -35,7 +35,7 @@ public abstract class WrappedAnswer<T> implements Answer<T> {
 	 * )
 	 */
 	@Override
-	public T answer(InvocationOnMock invocation) throws Throwable {
+	public T answer(final InvocationOnMock invocation) throws Throwable {
 		preProcess(invocation);
 
 		Optional<T> result = Optional.absent();
@@ -51,33 +51,34 @@ public abstract class WrappedAnswer<T> implements Answer<T> {
 		return postProcess(invocation, result, thrown);
 	}
 
-	/**
-	 * Can be overridden to add behavior.
-	 * 
-	 * @param invocation
-	 *            value passed to {@code answer}
-	 * @throws Throwable
-	 */
-	protected void preProcess(InvocationOnMock invocation) throws Throwable {
+	    /**
+     * Can be overridden to add behavior.
+     * 
+     * @param invocation
+     *            value passed to {@code answer}
+     * @throws Throwable
+     *             if a Throwable is thrown
+     */
+	protected void preProcess(final InvocationOnMock invocation) throws Throwable {
 		// NO OP, can be overridden
 	}
 
-	/**
-	 * Can be overridden to add behavior.
-	 * 
-	 * NOTE: any overriding classes should call {@code super.postProcess}
-	 * 
-	 * @param invocation
-	 *            value passed to {@code answer}
-	 * @param result
-	 *            value returned from {@code delegate} if any
-	 * @param thrown
-	 *            exception thrown from {@code delegate} if any
-	 * @return the value that should be returned from
-	 *         {@link #answer(InvocationOnMock)}
-	 * @throws Throwable
-	 */
-	protected T postProcess(InvocationOnMock invocation, Optional<T> result, Optional<? extends Throwable> thrown) throws Throwable {
+	    /**
+     * Can be overridden to add behavior.
+     * 
+     * NOTE: any overriding classes should call {@code super.postProcess}
+     * 
+     * @param invocation
+     *            value passed to {@code answer}
+     * @param result
+     *            value returned from {@code delegate} if any
+     * @param thrown
+     *            exception thrown from {@code delegate} if any
+     * @return the value that should be returned from {@link #answer(InvocationOnMock)}
+     * @throws Throwable
+     *             if a Throwable is thrown
+     */
+	protected T postProcess(final InvocationOnMock invocation, final Optional<T> result, final Optional<? extends Throwable> thrown) throws Throwable {
 		if (thrown.isPresent()) {
 			throw thrown.get();
 		} else {

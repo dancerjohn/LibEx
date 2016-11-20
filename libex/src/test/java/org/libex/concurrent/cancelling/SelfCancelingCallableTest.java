@@ -15,7 +15,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.libex.concurrent.TimeSpan;
-import org.libex.test.TestBase;
+import org.libex.test.TestBaseLocal;
 import org.libex.test.mockito.answer.DelayedAnswer;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -26,7 +26,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 
 @ParametersAreNonnullByDefault
 @ThreadSafe
-public class SelfCancelingCallableTest extends TestBase {
+public class SelfCancelingCallableTest extends TestBaseLocal {
 
 	private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 	private final ListeningScheduledExecutorService executorServiceList = MoreExecutors
@@ -48,9 +48,9 @@ public class SelfCancelingCallableTest extends TestBase {
 	@Before
 	public void setUp() throws Exception {
 		MockitoAnnotations.initMocks(this);
-		when(shortDelay.call()).thenAnswer(DelayedAnswer.create(shortTime));
-		when(longDelay.call()).thenAnswer(DelayedAnswer.create(longTime));
-		when(justLongDelay.call()).thenAnswer(DelayedAnswer.create(justLongTime));
+        when(shortDelay.call()).thenAnswer(DelayedAnswer.create(shortTime.toDuration()));
+        when(longDelay.call()).thenAnswer(DelayedAnswer.create(longTime.toDuration()));
+        when(justLongDelay.call()).thenAnswer(DelayedAnswer.create(justLongTime.toDuration()));
 	}
 
 	@After

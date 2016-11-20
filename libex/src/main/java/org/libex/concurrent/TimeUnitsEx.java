@@ -52,7 +52,7 @@ public final class TimeUnitsEx {
 	 * @return the string representation of the passed duration and time unit
 	 */
 	@Nonnull
-	public static String toString(long duration, TimeUnit timeUnit) {
+	public static String toString(final long duration, final TimeUnit timeUnit) {
 		return String.format(
 				"%d %s",
 				duration,
@@ -60,18 +60,18 @@ public final class TimeUnitsEx {
 						: SingularPlural.PLURAL));
 	}
 
-	/**
-	 * Gets the plural/singular lower-case name of the passed time unit
-	 * 
-	 * @param timeUnit
-	 *            the time unit
-	 * @param singular
-	 *            if the returned string should be singular
-	 * @return
-	 */
+	        /**
+     * Gets the plural/singular lower-case name of the passed time unit
+     * 
+     * @param timeUnit
+     *            the time unit
+     * @param singularPlural
+     *            if the returned string should be singular
+     * @return the name of the timeUnit in lower case
+     */
 	@Nonnull
-	public static String toLowercase(TimeUnit timeUnit,
-			SingularPlural singularPlural) {
+	public static String toLowercase(final TimeUnit timeUnit,
+			final SingularPlural singularPlural) {
 		if (singularPlural.isSingular()) {
 			return toSingularLowercase(timeUnit);
 		} else {
@@ -87,7 +87,7 @@ public final class TimeUnitsEx {
 	 * @return the lowercase singular name of the timeunit
 	 */
 	@Nonnull
-	public static String toSingularLowercase(TimeUnit timeUnit) {
+	public static String toSingularLowercase(final TimeUnit timeUnit) {
 		return lowercaseSingularNameMap.get(timeUnit);
 	}
 
@@ -99,7 +99,7 @@ public final class TimeUnitsEx {
 	 * @return the lowercase plural name of the timeunit
 	 */
 	@Nonnull
-	public static String toPluralLowercase(TimeUnit timeUnit) {
+	public static String toPluralLowercase(final TimeUnit timeUnit) {
 		return lowercasePluralNameMap.get(timeUnit);
 	}
 

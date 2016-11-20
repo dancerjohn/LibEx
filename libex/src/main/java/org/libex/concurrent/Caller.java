@@ -16,14 +16,17 @@ import javax.annotation.concurrent.ThreadSafe;
 @ParametersAreNonnullByDefault
 public interface Caller {
 
-	/**
-	 * Causes the callable to be invoked.
-	 * 
-	 * @param callable
-	 *            the callable
-	 * @return the value returned by the callable
-	 * @throws Exception
-	 *             any exception thrown by the callable
-	 */
-	<T> T call(Callable<T> callable) throws Exception;
+	    /**
+     * Causes the callable to be invoked.
+     * 
+     * @param callable
+     *            the callable
+     * @return the value returned by the callable
+     * @throws Exception
+     *             any exception thrown by the callable
+     * 
+     * @param <T>
+     *            type of the value returned
+     */
+	<T> T call(final Callable<T> callable) throws Exception;
 }

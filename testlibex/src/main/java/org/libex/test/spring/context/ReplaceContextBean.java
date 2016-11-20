@@ -16,8 +16,6 @@ import java.lang.annotation.Target;
  * <b>factoryMethod:</b> method to be invoked to retrieve the instance to be
  * used as the bean. If this is not set, the field's instance is used.
  * <p>
- * 
- * <p>
  * Basic usage:
  * 
  * <pre>

@@ -1,6 +1,7 @@
 package org.libex.concurrent.profile;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -19,9 +20,9 @@ import com.google.common.base.Stopwatch;
  * Profiles {@link Callable} instances, determining the length of time taken for
  * the {@link Callable} to complete. This class invokes the callback (if any
  * registered) for each passed {@link Callable}.
- * 
+ *
  * @author John Butler
- * 
+ *
  */
 @ThreadSafe
 @ParametersAreNonnullByDefault
@@ -47,8 +48,7 @@ public class Profiler implements Profiling {
 	}
 
 	private <T> T profile(Callable<T> callable, Callback callback) throws Exception {
-		Stopwatch stopWatch = Stopwatch.createStarted();
-		stopWatch.start();
+        Stopwatch stopWatch = Stopwatch.createStarted();
 
 		@Nullable
 		Exception caughtException = null;
