@@ -47,7 +47,7 @@ public class Profiler implements Profiling {
 	}
 
 	private <T> T profile(Callable<T> callable, Callback callback) throws Exception {
-		Stopwatch stopWatch = new Stopwatch();
+		Stopwatch stopWatch = Stopwatch.createStarted();
 		stopWatch.start();
 
 		@Nullable
@@ -59,7 +59,7 @@ public class Profiler implements Profiling {
 			caughtException = e;
 			throw caughtException;
 		} finally {
-			TimeSpan timeSpan = new TimeSpan(stopWatch.elapsedTime(TimeUnit.NANOSECONDS), TimeUnit.NANOSECONDS);
+			TimeSpan timeSpan = new TimeSpan(stopWatch.elapsed(TimeUnit.NANOSECONDS), TimeUnit.NANOSECONDS);
 			ProfileResult timedResult = new ProfileResult(timeSpan, callable);
 
 			if (logger.isTraceEnabled()) {
