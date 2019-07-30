@@ -3,6 +3,7 @@ package org.libex.base;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoint;
 import org.junit.experimental.theories.DataPoints;
@@ -36,12 +37,14 @@ public class OptionalsExTest {
 
 	@Theory
 	public void testToValueOrNull(final Optional<String> optional) {
+		Assume.assumeTrue(optional != null);
         String value = OptionalsEx.<String> toValueOrNull().apply(optional);
         assertThat(value, equalTo(optional.orNull()));
 	}
 
 	@Theory
 	public void testToValueOr(final Optional<String> optional) {
+		Assume.assumeTrue(optional != null);
 		String value = OptionalsEx.toValueOr("default").apply(optional);
 		assertThat(value, equalTo(optional.or("default")));
 	}

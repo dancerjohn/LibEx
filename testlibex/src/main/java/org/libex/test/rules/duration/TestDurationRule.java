@@ -45,6 +45,8 @@ public class TestDurationRule implements TestRule {
 		return classLevelTestDuration;
 	}
 
+
+
 	@Override
 	public Statement apply(Statement statement, Description description) {
 		return new DurationCheckingStatement(statement, description);

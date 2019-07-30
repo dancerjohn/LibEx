@@ -6,9 +6,10 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.ThreadSafe;
 
 import org.apache.camel.Body;
+import org.apache.camel.Exchange;
 import org.apache.camel.Headers;
 import org.apache.camel.Message;
-import org.apache.camel.impl.DefaultMessage;
+import org.apache.camel.support.DefaultMessage;
 import org.libex.test.validation.message.impl.TransformingMessageCapturer;
 
 import com.google.common.base.Function;
@@ -81,7 +82,7 @@ public class CamelTransformingMessageCapturer<KeyType, MessageType>
             @Body final Object body,
             @Headers final Map<String, Object> headers)
     {
-        DefaultMessage message = new DefaultMessage();
+        DefaultMessage message = new DefaultMessage((Exchange) null);
         message.setBody(body);
         message.setHeaders(headers);
 
