@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.jjbutler.libex</groupId>
 		<artifactId>libex-parent</artifactId>
-		<version>0.1.3-SNAPSHOT</version>
+		<version>0.1.3</version>
 	</parent>
 	<artifactId>libex-test</artifactId>
 	<name>Test Library Extension</name>
@@ -119,6 +119,6 @@
 		<connection>scm:svn:https://proj/svn/java-libex/tags/libex-test-0.0.2</connection>
 		<developerConnection>scm:svn:https://proj/svn/java-libex/tags/libex-test-0.0.2</developerConnection>
 		<url>scm:svn:https://proj/svn/java-libex/tags/libex-test-0.0.2</url>
-		<tag>HEAD</tag>
+		<tag>libex-parent-0.1.3</tag>
 	</scm>
 </project>
