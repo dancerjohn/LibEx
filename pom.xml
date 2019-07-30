@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.jjbutler.libex</groupId>
 	<artifactId>libex-parent</artifactId>
-	<version>0.1.3</version>
+	<version>0.1.4-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Library Extension Parent</name>
 	<description>Library Extension</description>
