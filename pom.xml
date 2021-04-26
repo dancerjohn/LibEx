@@ -23,7 +23,7 @@
 		<mockito-version>1.9.5</mockito-version>
 		<org.apache.velocity.version>1.7</org.apache.velocity.version>
 		<org.commons.lang.version>2.6</org.commons.lang.version>
-		<org.commons.io.version>2.4</org.commons.io.version>
+		<org.commons.io.version>2.7</org.commons.io.version>
 		<org.slf4j.version>1.7.5</org.slf4j.version>
 		<org.thymeleaf.version>2.1.4.RELEASE</org.thymeleaf.version>
 		<springframework-version>5.1.8.RELEASE</springframework-version>
